@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Ranking - Desbravadores</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  color: white;
+}
+
+.wrap {
+  max-width: 1000px;
+  margin: auto;
+  padding: 30px;
+}
+
+h1 {
+  text-align: center;
+}
+
+.updated {
+  text-align: center;
+  opacity: .8;
+  margin-bottom: 20px;
+}
+
+.podium {
+  display: grid;
+  grid-template-columns: repeat(5,1fr);
+  gap: 15px;
+  margin-bottom: 40px;
+}
+
+.card {
+  background: rgba(255,255,255,.1);
+  padding: 20px;
+  border-radius: 15px;
+  text-align: center;
+}
+
+.gold { background: rgba(255,215,0,.4); }
+.silver { background: rgba(192,192,192,.4); }
+.bronze { background: rgba(205,127,50,.4); }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 10px;
+  border-bottom: 1px solid rgba(255,255,255,.2);
+}
+
+th {
+  text-align: left;
+}
+
+.right {
+  text-align: right;
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+<h1>🏆 Ranking Oficial</h1>
+<div class="updated" id="updated">Atualizando...</div>
+
+<div class="podium" id="podium"></div>
+
+<h2>📋 Ranking Completo</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Desbravador</th>
+<th class="right">Pontos</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+
+</div>
+
+<script>
+
+const SHEET_ID = "1Is7javbUmG6p1Qoo7W4B1BDsP9b6o0cOIIoGhFGtLeA";
+const SHEET_NAME = "RANKING";
+
+const query = encodeURIComponent("select A, B where A is not null order by B desc");
+const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${SHEET_NAME}&tq=${query}`;
+
+function parse(text){
+  const json = text.substring(text.indexOf("{"), text.lastIndexOf("}")+1);
+  return JSON.parse(json);
+}
+
+function updateTime(){
+  document.getElementById("updated").innerText =
+    "Atualizado em: " + new Date().toLocaleString("pt-BR");
+}
+
+async function load(){
+  const res = await fetch(url);
+  const text = await res.text();
+  const data = parse(text);
+
+  const rows = data.table.rows.map(r => ({
+    name: r.c[0]?.v || "",
+    pts: r.c[1]?.v || 0
+  }));
+
+  // TOP 5
+  const podium = document.getElementById("podium");
+  podium.innerHTML = "";
+
+  const styles = ["gold","silver","bronze","",""];
+
+  rows.slice(0,5).forEach((p,i)=>{
+    const div = document.createElement("div");
+    div.className = "card " + styles[i];
+    div.innerHTML = `
+      <h3>${i+1}º Lugar</h3>
+      <strong>${p.name}</strong>
+      <p>${p.pts} pontos</p>
+    `;
+    podium.appendChild(div);
+  });
+
+  // TABELA
+  const tbody = document.getElementById("tbody");
+  tbody.innerHTML = "";
+
+  rows.forEach((p,i)=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${i+1}</td>
+      <td>${p.name}</td>
+      <td class="right">${p.pts}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  updateTime();
+}
+
+load();
+setInterval(load,60000);
+
+</script>
+
+</body>
+</html>
