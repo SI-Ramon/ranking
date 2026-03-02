@@ -52,7 +52,7 @@ h1{text-align:center;margin:0 0 12px;}
   position: relative;
   overflow: visible;
   background: rgba(255,255,255,.08);
-  padding: 84px 20px 20px;  /* <-- alterado: top padding maior para aproximar o avatar do texto */
+  padding: 100px 20px 20px;  /* <-- ajustado: top padding aumentado (era 84px) */
   border-radius: 15px;
   text-align: center;
   min-height: 260px;
@@ -70,10 +70,11 @@ h1{text-align:center;margin:0 0 12px;}
 .bronze { background: rgba(205,127,50,.28); }
 
 /* ===== avatares ===== */
-/* avatar posicionado mais para baixo (top menos negativo = mais próximo do texto) */
+/* avatar posicionado mais para baixo (top positivo = dentro do card, mais próximo do texto) */
+/* passei top de -8px para +8px (desceu o dobro do ajuste anterior) */
 .avatar{
   position: absolute;
-  top: -8px;                /* <-- alterado: avatar desceu mais (ficando mais próximo do texto) */
+  top: 8px;                 /* <-- alterado: avatar desceu mais (agora positivo) */
   left: 50%;
   transform: translateX(-50%);
   width: 92px;
@@ -130,29 +131,29 @@ th{text-align:left; font-weight:600;}
 
 /* ===== responsivo ===== */
 /* tablets / pequenos laptops */
+/* Aumentei top/padding proporcionalmente (desceu o dobro do ajuste anterior) */
 @media (max-width: 900px){
   .podium{ grid-template-columns: repeat(3, 1fr); gap:14px; }
-  /* reduzir um pouco o padding-top e ajustar avatar proporcionalmente */
-  .card{ min-height: 260px; padding-top: 80px; }   /* ajustado */
-  .avatar{ width: 88px; height:88px; top: -6px; }  /* avatar mais baixo proporcionalmente */
+  .card{ min-height: 260px; padding-top: 96px; }   /* antes 80px, agora 96px */
+  .avatar{ width: 88px; height:88px; top: 10px; }  /* antes -6px, agora +10px */
 }
 
 /* celulares (vertical) */
 @media (max-width: 480px){
   .podium{ grid-template-columns: repeat(3, 1fr); gap:10px; margin-bottom:30px; }
-  .card{ min-height: 240px; padding-top: 72px; border-radius: 18px; } /* padding-top ajustado */
-  .avatar{ width: 76px; height:76px; top: -4px; } /* avatar mais baixo proporcionalmente */
+  .card{ min-height: 240px; padding-top: 88px; border-radius: 18px; } /* antes 72px, agora 88px */
+  .avatar{ width: 76px; height:76px; top: 12px; } /* antes -4px, agora +12px */
   .card h3{ font-size:16px; }
   .card strong{ font-size:16px; }
   .card p{ font-size:14px; }
   th, td{ padding: 8px; }
 }
 
-/* muito pequeno (ex.: <360px), empilha 1 por vez se desejar */
+/* muito pequeno (ex.: <320px) */
 @media (max-width: 320px){
   .podium{ grid-template-columns: repeat(1, 1fr); }
-  .card{ min-height: 220px; padding-top: 64px; }
-  .avatar{ width:70px; height:70px; top:-3px; }
+  .card{ min-height: 220px; padding-top: 80px; } /* antes 64px, agora 80px */
+  .avatar{ width:70px; height:70px; top: 13px; } /* antes -3px, agora +13px */
 }
 </style>
 </head>
