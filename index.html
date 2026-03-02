@@ -52,7 +52,7 @@ h1{text-align:center;margin:0 0 12px;}
   position: relative;
   overflow: visible;
   background: rgba(255,255,255,.08);
-  padding: 76px 20px 20px;  /* <-- alterado: top padding maior */
+  padding: 84px 20px 20px;  /* <-- alterado: top padding maior para aproximar o avatar do texto */
   border-radius: 15px;
   text-align: center;
   min-height: 260px;
@@ -70,13 +70,13 @@ h1{text-align:center;margin:0 0 12px;}
 .bronze { background: rgba(205,127,50,.28); }
 
 /* ===== avatares ===== */
-/* avatar posicionado mais para baixo (top menos negativo) */
+/* avatar posicionado mais para baixo (top menos negativo = mais próximo do texto) */
 .avatar{
   position: absolute;
-  top: -16px;                /* <-- alterado: valor menos negativo = avatar mais baixo */
+  top: -8px;                /* <-- alterado: avatar desceu mais (ficando mais próximo do texto) */
   left: 50%;
   transform: translateX(-50%);
-  width: 92px;               /* tamanho mantido */
+  width: 92px;
   height: 92px;
   border-radius: 50%;
   object-fit: cover;
@@ -132,16 +132,16 @@ th{text-align:left; font-weight:600;}
 /* tablets / pequenos laptops */
 @media (max-width: 900px){
   .podium{ grid-template-columns: repeat(3, 1fr); gap:14px; }
-  /* reduzir um pouco o padding-top e ajustar avatar */
-  .card{ min-height: 260px; padding-top: 72px; }
-  .avatar{ width: 88px; height:88px; top: -14px; }
+  /* reduzir um pouco o padding-top e ajustar avatar proporcionalmente */
+  .card{ min-height: 260px; padding-top: 80px; }   /* ajustado */
+  .avatar{ width: 88px; height:88px; top: -6px; }  /* avatar mais baixo proporcionalmente */
 }
 
 /* celulares (vertical) */
 @media (max-width: 480px){
   .podium{ grid-template-columns: repeat(3, 1fr); gap:10px; margin-bottom:30px; }
-  .card{ min-height: 240px; padding-top: 64px; border-radius: 18px; } /* padding-top ajustado */
-  .avatar{ width: 76px; height:76px; top: -12px; } /* avatar mais baixo proporcionalmente */
+  .card{ min-height: 240px; padding-top: 72px; border-radius: 18px; } /* padding-top ajustado */
+  .avatar{ width: 76px; height:76px; top: -4px; } /* avatar mais baixo proporcionalmente */
   .card h3{ font-size:16px; }
   .card strong{ font-size:16px; }
   .card p{ font-size:14px; }
@@ -151,8 +151,8 @@ th{text-align:left; font-weight:600;}
 /* muito pequeno (ex.: <360px), empilha 1 por vez se desejar */
 @media (max-width: 320px){
   .podium{ grid-template-columns: repeat(1, 1fr); }
-  .card{ min-height: 220px; padding-top: 56px; }
-  .avatar{ width:70px; height:70px; top:-11px; }
+  .card{ min-height: 220px; padding-top: 64px; }
+  .avatar{ width:70px; height:70px; top:-3px; }
 }
 </style>
 </head>
@@ -178,6 +178,7 @@ th{text-align:left; font-weight:600;}
   <div class="muted" id="status"></div>
 </div>
 
+<!-- Rodapé fixo com a informação de atualização -->
 <footer class="page-footer">
   <div id="updated" class="updated">Atualizando...</div>
 </footer>
@@ -202,16 +203,25 @@ function parseGViz(text){
 function normalizeDriveImage(raw){
   if (!raw) return "";
   let u = String(raw).trim();
+
+  // se veio =IMAGE("..."), extrai a URL
   const mImg = u.match(/IMAGE\(\"(.*)\"\)/i);
   if (mImg && mImg[1]) u = mImg[1].trim();
+
+  // drive file/d/ID
   const m1 = u.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
   if (m1 && m1[1]) return `https://drive.google.com/uc?export=view&id=${m1[1]}`;
+
+  // drive open?id=ID
   const m2 = u.match(/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/);
   if (m2 && m2[1]) return `https://drive.google.com/uc?export=view&id=${m2[1]}`;
+
+  // já com id=... e é do drive
   const m3 = u.match(/[?&]id=([a-zA-Z0-9_-]+)/);
   if (m3 && m3[1] && u.includes("drive.google.com")) {
     return `https://drive.google.com/uc?export=view&id=${m3[1]}`;
   }
+
   return u;
 }
 function driveAlt(u){
