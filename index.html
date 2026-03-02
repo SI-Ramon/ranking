@@ -19,9 +19,7 @@ body {
   padding: 30px;
 }
 
-h1 {
-  text-align: center;
-}
+h1 { text-align: center; }
 
 .updated {
   text-align: center;
@@ -57,43 +55,61 @@ th, td {
   border-bottom: 1px solid rgba(255,255,255,.2);
 }
 
-th {
-  text-align: left;
+th { text-align: left; }
+.right { text-align: right; }
+
+.avatar{
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  display:block;
+  margin: 0 auto 10px;
+  border: 2px solid rgba(255,255,255,.35);
 }
 
-.right {
-  text-align: right;
+.rowflex{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.avatar-sm{
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(255,255,255,.35);
 }
 </style>
 </head>
 
 <body>
-
 <div class="wrap">
-<h1>🏆 Ranking Oficial</h1>
-<div class="updated" id="updated">Atualizando...</div>
+  <h1>🏆 Ranking Oficial</h1>
+  <div class="updated" id="updated">Atualizando...</div>
 
-<div class="podium" id="podium"></div>
+  <div class="podium" id="podium"></div>
 
-<h2>📋 Ranking Completo</h2>
-<table>
-<thead>
-<tr>
-<th>#</th>
-<th>Desbravador</th>
-<th class="right">Pontos</th>
-</tr>
-</thead>
-<tbody id="tbody"></tbody>
-</table>
-
+  <h2>📋 Ranking Completo</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Desbravador</th>
+        <th class="right">Pontos</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
 </div>
 
 <script>
-const SHEET_ID = "1XSBKPMg4nlzAJpACvZ5hCumqOyFPFIIRqV60gghP43E"; // ✅ atualizado
+const SHEET_ID = "1XSBKPMg4nlzAJpACvZ5hCumqOyFPFIIRqV60gghP43E";
 const SHEET_NAME = "RANKING";
 
-const query = encodeURIComponent("select A, B where A is not null order by B desc");
+// Agora buscamos A, B e C (foto)
+const query = encodeURIComponent("select A, B, C where A is not null order by B desc");
 const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${SHEET_NAME}&tq=${query}`;
 
 function parse(text){
@@ -113,7 +129,8 @@ async function load(){
 
   const rows = data.table.rows.map(r => ({
     name: r.c[0]?.v || "",
-    pts: r.c[1]?.v || 0
+    pts: r.c[1]?.v || 0,
+    photo: r.c[2]?.v || ""
   }));
 
   // TOP 5
@@ -126,6 +143,7 @@ async function load(){
     const div = document.createElement("div");
     div.className = "card " + styles[i];
     div.innerHTML = `
+      ${p.photo ? `<img class="avatar" src="${p.photo}" alt="Foto de ${p.name}">` : ""}
       <h3>${i+1}º Lugar</h3>
       <strong>${p.name}</strong>
       <p>${p.pts} pontos</p>
@@ -141,7 +159,12 @@ async function load(){
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${i+1}</td>
-      <td>${p.name}</td>
+      <td>
+        <div class="rowflex">
+          ${p.photo ? `<img class="avatar-sm" src="${p.photo}" alt="Foto de ${p.name}">` : ""}
+          <span>${p.name}</span>
+        </div>
+      </td>
       <td class="right">${p.pts}</td>
     `;
     tbody.appendChild(tr);
@@ -151,7 +174,7 @@ async function load(){
 }
 
 load();
-setInterval(load,60000);
+setInterval(load, 60000);
 </script>
 
 </body>
