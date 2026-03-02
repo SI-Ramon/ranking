@@ -12,10 +12,16 @@ body{
   margin:0;
   background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
   color:#fff;
+  min-height:100vh;
 }
-.wrap{max-width:1000px;margin:auto;padding:30px;}
+.wrap{
+  max-width:1000px;
+  margin:auto;
+  padding:30px;
+  padding-bottom:110px; /* espaço para o footer fixo */
+}
 h1{text-align:center;}
-.updated{text-align:center;opacity:.8;margin-bottom:20px;}
+/* vamos remover o updated do topo, ele estará no footer */
 
 /* ===== podium grid ===== */
 .podium{
@@ -23,18 +29,18 @@ h1{text-align:center;}
   grid-template-columns:repeat(5,1fr);
   gap:15px;
   margin-bottom:40px;
-  justify-items:center; /* centraliza cada card no grid cell */
+  justify-items:center;
 }
 
 /* ===== card ===== */
 .card{
-  position: relative;       /* necessário para posicionar avatar absoluto */
-  overflow: visible;        /* permite avatar "sair" do card sem ser cortado */
+  position: relative;
+  overflow: visible;
   background: rgba(255,255,255,.1);
-  padding: 24px 20px 20px;  /* top padding para espaçar conteúdo abaixo do avatar */
+  padding: 24px 20px 20px;
   border-radius: 15px;
   text-align: center;
-  min-height: 260px;        /* altura mínima para caber avatar + texto */
+  min-height: 260px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -42,16 +48,14 @@ h1{text-align:center;}
   box-sizing: border-box;
 }
 
-/* cores pódio */
 .gold { background: rgba(255,215,0,.35); }
 .silver { background: rgba(192,192,192,.30); }
 .bronze { background: rgba(205,127,50,.30); }
 
 /* ===== avatares ===== */
-/* avatar do pódio (maior) - posicionado absoluto para não ser cortado */
 .avatar{
   position: absolute;
-  top: -46px;                 /* metade do tamanho do avatar (ajustável) */
+  top: -46px;
   left: 50%;
   transform: translateX(-50%);
   width: 92px;
@@ -65,7 +69,6 @@ h1{text-align:center;}
   display: block;
 }
 
-/* avatar pequeno na tabela */
 .avatar-sm{
   width:34px;
   height:34px;
@@ -88,15 +91,32 @@ th{text-align:left;}
 .rowflex{display:flex;align-items:center;gap:10px;}
 .muted{opacity:.75;font-size:.9rem;margin-top:10px;}
 
+/* ===== footer (rodapé fixo) ===== */
+.page-footer{
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(12,25,30,0.0), rgba(0,0,0,0.35));
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 10px 0;
+  text-align: center;
+  color: #fff;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+.page-footer .updated {
+  font-size: 0.95rem;
+  opacity: .9;
+}
+
 /* ===== responsivo ===== */
-/* tablets / pequenos laptops */
 @media (max-width: 900px){
   .podium{ grid-template-columns: repeat(3, 1fr); gap:14px; }
   .card{ min-height: 260px; padding-top: 34px; }
   .avatar{ width: 88px; height:88px; top: -44px; }
 }
 
-/* celulares (vertical) */
 @media (max-width: 480px){
   .podium{ grid-template-columns: repeat(3, 1fr); gap:10px; }
   .card{ min-height: 240px; padding-top: 32px; border-radius: 18px; }
@@ -105,11 +125,9 @@ th{text-align:left;}
   .card strong{ font-size:16px; }
   .card p{ font-size:14px; }
 
-  /* se for muito estreito, reduzir tabela padding */
   th, td{ padding: 8px; }
 }
 
-/* muito pequeno (ex.: <360px), empilha 1 por vez se preferir */
 @media (max-width: 320px){
   .podium{ grid-template-columns: repeat(1, 1fr); }
   .card{ min-height: 220px; padding-top: 28px; }
@@ -120,8 +138,7 @@ th{text-align:left;}
 
 <body>
 <div class="wrap">
-  <h1>🏆 Ranking Oficial</h1>
-  <div class="updated" id="updated">Atualizando...</div>
+  <h1>🏆 Ranking - Guardiões da Lei</h1>
 
   <div class="podium" id="podium"></div>
 
@@ -140,10 +157,14 @@ th{text-align:left;}
   <div class="muted" id="status"></div>
 </div>
 
+<!-- Rodapé fixo com a informação de atualização -->
+<footer class="page-footer">
+  <div id="updated" class="updated">Atualizando...</div>
+</footer>
+
 <script>
 /* -------------------------
-  Seu JS atual pode ficar aqui (mantive a versão funcional).
-  O estilo e posicionamento do avatar já foram ajustados via CSS acima.
+  JS (mantive funcionalidade anterior)
 ---------------------------*/
 const SHEET_ID = "1XSBKPMg4nlzAJpACvZ5hCumqOyFPFIIRqV60gghP43E";
 const SHEET_NAME = "RANKING";
@@ -197,15 +218,15 @@ function makeImg(photoUrl, cls, alt){
       img.src = altUrl;
       return;
     }
-    // se falhar, deixamos src vazio — CSS mostra fundo neutro do avatar
     img.src = '';
   };
   return img;
 }
 
 function updateTime(){
-  document.getElementById("updated").innerText =
-    "Atualizado em: " + new Date().toLocaleString("pt-BR");
+  const el = document.getElementById("updated");
+  if (!el) return;
+  el.innerText = "Atualizado em: " + new Date().toLocaleString("pt-BR");
 }
 
 async function load(){
@@ -221,13 +242,14 @@ async function load(){
     const photoFinal = normalizeDriveImage(photoRaw);
     return { name, pts, photoRaw, photoFinal };
   }).filter(x => x.name);
+
   const podium = document.getElementById("podium");
   podium.innerHTML = "";
   const styles = ["gold","silver","bronze","",""];
+
   rows.slice(0,5).forEach((p,i)=>{
     const div = document.createElement("div");
     div.className = "card " + styles[i];
-    // avatar absoluto dentro do card
     const img = makeImg(p.photoFinal, "avatar", `Foto de ${p.name}`);
     div.appendChild(img);
 
@@ -278,7 +300,9 @@ load().catch(err => {
   document.getElementById("status").textContent = "Erro ao carregar: " + (err?.message || err);
   console.error(err);
 });
-setInterval(() => load().catch(console.error), 60000);
+setInterval(() => {
+  load().catch(console.error);
+}, 60000);
 </script>
 
 </body>
