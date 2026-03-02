@@ -35,7 +35,41 @@ body{
   padding:30px;
   padding-bottom:110px; /* espaço para o footer fixo */
 }
-h1{text-align:center;margin:0 0 12px;}
+
+/* header com emblema + título */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* centraliza na página */
+  gap: 12px;
+  margin-bottom: 8px;
+}
+h1.title {
+  font-size: 28px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* emblema do clube */
+.club-emblem {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  border-radius: 8px;
+  border: 2px solid rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.08);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+  display: inline-block;
+}
+
+/* quando não houver emblema, escondemos o <img> e centralizamos apenas o texto */
+.header.no-emblem {
+  justify-content: center;
+}
 
 /* ===== podium grid ===== */
 .podium{
@@ -47,12 +81,11 @@ h1{text-align:center;margin:0 0 12px;}
 }
 
 /* ===== card ===== */
-/* padding-top aumentado para acomodar o avatar mais baixo */
 .card{
   position: relative;
   overflow: visible;
   background: rgba(255,255,255,.08);
-  padding: 100px 20px 20px;  /* <-- ajustado: top padding aumentado (era 84px) */
+  padding: 100px 20px 20px;
   border-radius: 15px;
   text-align: center;
   min-height: 260px;
@@ -70,11 +103,9 @@ h1{text-align:center;margin:0 0 12px;}
 .bronze { background: rgba(205,127,50,.28); }
 
 /* ===== avatares ===== */
-/* avatar posicionado mais para baixo (top positivo = dentro do card, mais próximo do texto) */
-/* passei top de -8px para +8px (desceu o dobro do ajuste anterior) */
 .avatar{
   position: absolute;
-  top: 8px;                 /* <-- alterado: avatar desceu mais (agora positivo) */
+  top: 8px;
   left: 50%;
   transform: translateX(-50%);
   width: 92px;
@@ -130,37 +161,40 @@ th{text-align:left; font-weight:600;}
 }
 
 /* ===== responsivo ===== */
-/* tablets / pequenos laptops */
-/* Aumentei top/padding proporcionalmente (desceu o dobro do ajuste anterior) */
 @media (max-width: 900px){
   .podium{ grid-template-columns: repeat(3, 1fr); gap:14px; }
-  .card{ min-height: 260px; padding-top: 96px; }   /* antes 80px, agora 96px */
-  .avatar{ width: 88px; height:88px; top: 10px; }  /* antes -6px, agora +10px */
+  .card{ min-height: 260px; padding-top: 96px; }
+  .avatar{ width: 88px; height:88px; top: 10px; }
+  .club-emblem{ width: 52px; height: 52px; }
 }
 
-/* celulares (vertical) */
 @media (max-width: 480px){
   .podium{ grid-template-columns: repeat(3, 1fr); gap:10px; margin-bottom:30px; }
-  .card{ min-height: 240px; padding-top: 88px; border-radius: 18px; } /* antes 72px, agora 88px */
-  .avatar{ width: 76px; height:76px; top: 12px; } /* antes -4px, agora +12px */
+  .card{ min-height: 240px; padding-top: 88px; border-radius: 18px; }
+  .avatar{ width: 76px; height:76px; top: 12px; }
+  .club-emblem{ width: 46px; height: 46px; }
   .card h3{ font-size:16px; }
   .card strong{ font-size:16px; }
   .card p{ font-size:14px; }
   th, td{ padding: 8px; }
 }
 
-/* muito pequeno (ex.: <320px) */
 @media (max-width: 320px){
   .podium{ grid-template-columns: repeat(1, 1fr); }
-  .card{ min-height: 220px; padding-top: 80px; } /* antes 64px, agora 80px */
-  .avatar{ width:70px; height:70px; top: 13px; } /* antes -3px, agora +13px */
+  .card{ min-height: 220px; padding-top: 80px; }
+  .avatar{ width:70px; height:70px; top: 13px; }
+  .club-emblem{ width: 40px; height: 40px; }
 }
 </style>
 </head>
 
 <body>
 <div class="wrap">
-  <h1>🏆 RANKING - GUARDIÕES</h1>
+  <!-- header: emblema + título -->
+  <div id="headerWrap" class="header">
+    <img id="clubEmblem" class="club-emblem" src="" alt="Emblema do clube" />
+    <h1 class="title">Ranking - Guardiões</h1>
+  </div>
 
   <div class="podium" id="podium"></div>
 
@@ -179,16 +213,17 @@ th{text-align:left; font-weight:600;}
   <div class="muted" id="status"></div>
 </div>
 
-<!-- Rodapé fixo com a informação de atualização -->
 <footer class="page-footer">
   <div id="updated" class="updated">Atualizando...</div>
 </footer>
 
 <script>
-/* -------------------------
-  JS: busca A (nome), B (pontos), C (foto) na aba RANKING
----------------------------*/
+/* ============================
+  EMBLEM_URL já configurado com o link que você enviou
+============================ */
+const EMBLEM_URL = "https://raw.githubusercontent.com/SI-Ramon/ranking/main/ranking/img/GUARDIOES.jpg";
 
+// ===== restante do JS (busca planilha e renderiza) =====
 const SHEET_ID = "1XSBKPMg4nlzAJpACvZ5hCumqOyFPFIIRqV60gghP43E";
 const SHEET_NAME = "RANKING";
 const query = encodeURIComponent("select A, B, C where A is not null order by B desc");
@@ -201,28 +236,20 @@ function parseGViz(text){
   return JSON.parse(text.substring(start, end + 1));
 }
 
+/* Normaliza links do Drive / aceita =IMAGE("...") e links comuns */
 function normalizeDriveImage(raw){
   if (!raw) return "";
   let u = String(raw).trim();
-
-  // se veio =IMAGE("..."), extrai a URL
   const mImg = u.match(/IMAGE\(\"(.*)\"\)/i);
   if (mImg && mImg[1]) u = mImg[1].trim();
-
-  // drive file/d/ID
   const m1 = u.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
   if (m1 && m1[1]) return `https://drive.google.com/uc?export=view&id=${m1[1]}`;
-
-  // drive open?id=ID
   const m2 = u.match(/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/);
   if (m2 && m2[1]) return `https://drive.google.com/uc?export=view&id=${m2[1]}`;
-
-  // já com id=... e é do drive
   const m3 = u.match(/[?&]id=([a-zA-Z0-9_-]+)/);
   if (m3 && m3[1] && u.includes("drive.google.com")) {
     return `https://drive.google.com/uc?export=view&id=${m3[1]}`;
   }
-
   return u;
 }
 function driveAlt(u){
@@ -255,12 +282,29 @@ function makeImg(photoUrl, cls, alt){
   return img;
 }
 
+/* Emblema do clube: carrega e aplica fallback se não houver */
+function loadEmblem() {
+  const imgEl = document.getElementById('clubEmblem');
+  const header = document.getElementById('headerWrap');
+  if (!EMBLEM_URL || EMBLEM_URL.trim() === "") {
+    // sem emblema: esconde o <img> e centraliza o título
+    imgEl.style.display = 'none';
+    header.classList.add('no-emblem');
+    return;
+  }
+  imgEl.src = EMBLEM_URL;
+  imgEl.onerror = () => { imgEl.style.display = 'none'; header.classList.add('no-emblem'); };
+  imgEl.onload = () => { imgEl.style.display = 'inline-block'; header.classList.remove('no-emblem'); };
+}
+
+/* atualiza texto de "Atualizado em:" no rodapé */
 function updateTime(){
   const el = document.getElementById("updated");
   if (!el) return;
   el.innerText = "Atualizado em: " + new Date().toLocaleString("pt-BR");
 }
 
+/* Carrega dados e renderiza */
 async function load(){
   const status = document.getElementById("status");
   status.textContent = "";
@@ -268,6 +312,7 @@ async function load(){
     const res = await fetch(url, { cache: "no-store" });
     const text = await res.text();
     const data = parseGViz(text);
+
     const rows = (data.table.rows || []).map(r => {
       const name = r.c?.[0]?.v || "";
       const pts = r.c?.[1]?.v || 0;
@@ -343,6 +388,8 @@ async function load(){
   }
 }
 
+/* Init */
+loadEmblem();
 load().catch(err => {
   document.getElementById("status").textContent = "Erro ao carregar: " + (err?.message || err);
   console.error(err);
@@ -352,4 +399,3 @@ setInterval(() => load().catch(console.error), 60000);
 
 </body>
 </html>
-
