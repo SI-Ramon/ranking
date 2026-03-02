@@ -7,7 +7,6 @@
 
 <style>
 /* ===== BODY / BACKGROUND ===== */
-/* Usei a imagem do GitHub Pages (Desbravadores.jpg) com overlay escuro */
 body{
   font-family: Arial, sans-serif;
   margin: 0;
@@ -16,14 +15,12 @@ body{
 
   background-image:
     linear-gradient(rgba(12,25,30,0.60), rgba(12,25,30,0.60)),
-    url('https://raw.githubusercontent.com/SI-Ramon/ranking/main/ranking/img/Desbravadores.jpg');
+    url('https://si-ramon.github.io/ranking/img/Desbravadores.jpg');
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
   background-attachment: fixed;
 }
-
-/* No mobile, background-attachment: fixed pode dar problema - usar scroll */
 @media (max-width: 480px){
   body{
     background-attachment: scroll;
@@ -39,7 +36,6 @@ body{
   padding-bottom:110px; /* espaço para o footer fixo */
 }
 h1{text-align:center;margin:0 0 12px;}
-/* subtítulo removido do topo (agora é no rodapé) */
 
 /* ===== podium grid ===== */
 .podium{
@@ -51,11 +47,12 @@ h1{text-align:center;margin:0 0 12px;}
 }
 
 /* ===== card ===== */
+/* padding-top aumentado para acomodar o avatar mais baixo */
 .card{
-  position: relative;       /* necessário para posicionar avatar absoluto */
-  overflow: visible;        /* permite avatar "sair" do card sem ser cortado */
+  position: relative;
+  overflow: visible;
   background: rgba(255,255,255,.08);
-  padding: 34px 20px 20px;  /* top padding para espaçar conteúdo abaixo do avatar */
+  padding: 76px 20px 20px;  /* <-- alterado: top padding maior */
   border-radius: 15px;
   text-align: center;
   min-height: 260px;
@@ -73,12 +70,13 @@ h1{text-align:center;margin:0 0 12px;}
 .bronze { background: rgba(205,127,50,.28); }
 
 /* ===== avatares ===== */
+/* avatar posicionado mais para baixo (top menos negativo) */
 .avatar{
   position: absolute;
-  top: -46px;
+  top: -16px;                /* <-- alterado: valor menos negativo = avatar mais baixo */
   left: 50%;
   transform: translateX(-50%);
-  width: 92px;
+  width: 92px;               /* tamanho mantido */
   height: 92px;
   border-radius: 50%;
   object-fit: cover;
@@ -131,16 +129,19 @@ th{text-align:left; font-weight:600;}
 }
 
 /* ===== responsivo ===== */
+/* tablets / pequenos laptops */
 @media (max-width: 900px){
   .podium{ grid-template-columns: repeat(3, 1fr); gap:14px; }
-  .card{ min-height: 260px; padding-top: 48px; }
-  .avatar{ width: 88px; height:88px; top: -44px; }
+  /* reduzir um pouco o padding-top e ajustar avatar */
+  .card{ min-height: 260px; padding-top: 72px; }
+  .avatar{ width: 88px; height:88px; top: -14px; }
 }
 
+/* celulares (vertical) */
 @media (max-width: 480px){
   .podium{ grid-template-columns: repeat(3, 1fr); gap:10px; margin-bottom:30px; }
-  .card{ min-height: 240px; padding-top: 42px; border-radius: 18px; }
-  .avatar{ width: 76px; height:76px; top: -38px; }
+  .card{ min-height: 240px; padding-top: 64px; border-radius: 18px; } /* padding-top ajustado */
+  .avatar{ width: 76px; height:76px; top: -12px; } /* avatar mais baixo proporcionalmente */
   .card h3{ font-size:16px; }
   .card strong{ font-size:16px; }
   .card p{ font-size:14px; }
@@ -150,15 +151,15 @@ th{text-align:left; font-weight:600;}
 /* muito pequeno (ex.: <360px), empilha 1 por vez se desejar */
 @media (max-width: 320px){
   .podium{ grid-template-columns: repeat(1, 1fr); }
-  .card{ min-height: 220px; padding-top: 32px; }
-  .avatar{ width:70px; height:70px; top:-35px; }
+  .card{ min-height: 220px; padding-top: 56px; }
+  .avatar{ width:70px; height:70px; top:-11px; }
 }
 </style>
 </head>
 
 <body>
 <div class="wrap">
-  <h1>🏆 Ranking - Guardiões da Lei</h1>
+  <h1>🏆 Ranking Oficial</h1>
 
   <div class="podium" id="podium"></div>
 
@@ -177,7 +178,6 @@ th{text-align:left; font-weight:600;}
   <div class="muted" id="status"></div>
 </div>
 
-<!-- Rodapé fixo com a informação de atualização -->
 <footer class="page-footer">
   <div id="updated" class="updated">Atualizando...</div>
 </footer>
@@ -199,90 +199,64 @@ function parseGViz(text){
   return JSON.parse(text.substring(start, end + 1));
 }
 
-/* Normaliza links do Drive / aceita =IMAGE("...") e links comuns */
 function normalizeDriveImage(raw){
   if (!raw) return "";
   let u = String(raw).trim();
-
-  // se veio =IMAGE("..."), extrai a URL
   const mImg = u.match(/IMAGE\(\"(.*)\"\)/i);
   if (mImg && mImg[1]) u = mImg[1].trim();
-
-  // drive file/d/ID
   const m1 = u.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
   if (m1 && m1[1]) return `https://drive.google.com/uc?export=view&id=${m1[1]}`;
-
-  // drive open?id=ID
   const m2 = u.match(/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/);
   if (m2 && m2[1]) return `https://drive.google.com/uc?export=view&id=${m2[1]}`;
-
-  // já com id=... e é do drive
   const m3 = u.match(/[?&]id=([a-zA-Z0-9_-]+)/);
   if (m3 && m3[1] && u.includes("drive.google.com")) {
     return `https://drive.google.com/uc?export=view&id=${m3[1]}`;
   }
-
-  // se não bateu com Drive, retorna a URL como vem
   return u;
 }
-
-/* Alternativa 'download' (tentativa caso view falhe) */
 function driveAlt(u){
   const m = u.match(/uc\?export=view&id=([a-zA-Z0-9_-]+)/);
   if (m && m[1]) return `https://drive.google.com/uc?export=download&id=${m[1]}`;
   return u;
 }
-
-/* cache-buster para forçar recarregar imagem quando necessário */
 function bust(u){
   if (!u) return u;
   const sep = u.includes("?") ? "&" : "?";
   return `${u}${sep}t=${Date.now()}`;
 }
-
-/* Cria elemento <img> com fallback para tentar driveAlt e depois deixar sem src (background neutro) */
 function makeImg(photoUrl, cls, alt){
   const img = document.createElement("img");
   img.className = cls;
   img.alt = alt;
   img.referrerPolicy = "no-referrer";
   img.crossOrigin = "anonymous";
-
   const initial = photoUrl ? bust(photoUrl) : '';
   img.src = initial || '';
-
   img.onerror = () => {
-    // tenta alternativa do Drive (uma vez)
     if (photoUrl && photoUrl.includes("drive.google.com") && !img.dataset.triedAlt) {
       img.dataset.triedAlt = "1";
       const altUrl = bust(driveAlt(photoUrl));
       img.src = altUrl;
       return;
     }
-    // se falhar, removemos o src (CSS deixa um fundo neutro)
     img.src = '';
   };
-
   return img;
 }
 
-/* atualiza texto de "Atualizado em:" no rodapé */
 function updateTime(){
   const el = document.getElementById("updated");
   if (!el) return;
   el.innerText = "Atualizado em: " + new Date().toLocaleString("pt-BR");
 }
 
-/* Carrega dados e renderiza */
 async function load(){
   const status = document.getElementById("status");
   status.textContent = "";
-
   try {
     const res = await fetch(url, { cache: "no-store" });
     const text = await res.text();
     const data = parseGViz(text);
-
     const rows = (data.table.rows || []).map(r => {
       const name = r.c?.[0]?.v || "";
       const pts = r.c?.[1]?.v || 0;
@@ -367,4 +341,3 @@ setInterval(() => load().catch(console.error), 60000);
 
 </body>
 </html>
-
