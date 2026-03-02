@@ -22,7 +22,6 @@ h1{text-align:center;}
   gap:15px;
   margin-bottom:40px;
 }
-
 .card{
   background:rgba(255,255,255,.1);
   padding:20px;
@@ -38,20 +37,19 @@ table{width:100%;border-collapse:collapse;}
 th,td{padding:10px;border-bottom:1px solid rgba(255,255,255,.2);}
 th{text-align:left;}
 .right{text-align:right;}
-
-.avatar{
-  width:72px;height:72px;border-radius:50%;
-  object-fit:cover;display:block;margin:0 auto 10px;
-  border:2px solid rgba(255,255,255,.35);
-  background: rgba(0,0,0,.15);
-}
-.avatar-sm{
-  width:34px;height:34px;border-radius:50%;
-  object-fit:cover;border:1px solid rgba(255,255,255,.35);
-  background: rgba(0,0,0,.15);
-}
 .rowflex{display:flex;align-items:center;gap:10px;}
-.muted{opacity:.75;font-size:.9rem;}
+
+.avatar, .avatar-sm{
+  border-radius:50%;
+  object-fit:cover;
+  background: rgba(0,0,0,.15);
+  border: 2px solid rgba(255,255,255,.35);
+  display:block;
+}
+.avatar{width:72px;height:72px;margin:0 auto 10px;}
+.avatar-sm{width:34px;height:34px;border-width:1px;}
+
+.muted{opacity:.75;font-size:.9rem;margin-top:10px;}
 </style>
 </head>
 
@@ -80,12 +78,26 @@ th{text-align:left;}
 <script>
 const SHEET_ID = "1XSBKPMg4nlzAJpACvZ5hCumqOyFPFIIRqV60gghP43E";
 const SHEET_NAME = "RANKING";
-
-// Busca A (nome), B (pontos), C (foto)
 const query = encodeURIComponent("select A, B, C where A is not null order by B desc");
 const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tq=${query}`;
 
-// Parse do gviz
+// Placeholder (sempre aparece se não tiver foto)
+const PLACEHOLDER =
+  'data:image/svg+xml;utf8,' +
+  encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+      <defs>
+        <linearGradient id="g" x1="0" x2="1">
+          <stop offset="0" stop-color="#203a43"/>
+          <stop offset="1" stop-color="#2c5364"/>
+        </linearGradient>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#g)"/>
+      <circle cx="100" cy="78" r="42" fill="#ffffff55"/>
+      <rect x="40" y="125" width="120" height="60" rx="30" fill="#ffffff55"/>
+    </svg>
+  `);
+
 function parseGViz(text){
   const start = text.indexOf("{");
   const end = text.lastIndexOf("}");
@@ -93,47 +105,66 @@ function parseGViz(text){
   return JSON.parse(text.substring(start, end + 1));
 }
 
-// Converte links do Drive comuns em link direto
+// Converte links comuns do Drive em link direto
 function normalizeDriveImage(raw){
   if (!raw) return "";
+  let u = String(raw).trim();
 
-  let url = String(raw).trim();
+  const mImg = u.match(/IMAGE\(\"(.*)\"\)/i);
+  if (mImg && mImg[1]) u = mImg[1].trim();
 
-  // Suporta célula com fórmula =IMAGE("...") retornando algo parecido
-  // (às vezes o gviz devolve string com IMAGE)
-  const mImg = url.match(/IMAGE\(\"(.*)\"\)/i);
-  if (mImg && mImg[1]) url = mImg[1].trim();
-
-  // Links do Drive comuns
-  const m1 = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+  const m1 = u.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
   if (m1 && m1[1]) return `https://drive.google.com/uc?export=view&id=${m1[1]}`;
 
-  const m2 = url.match(/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/);
+  const m2 = u.match(/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/);
   if (m2 && m2[1]) return `https://drive.google.com/uc?export=view&id=${m2[1]}`;
 
-  const m3 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-  if (m3 && m3[1] && url.includes("drive.google.com")) {
+  const m3 = u.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (m3 && m3[1] && u.includes("drive.google.com")) {
     return `https://drive.google.com/uc?export=view&id=${m3[1]}`;
   }
 
-  // Se já veio no formato uc?export=view, mantém
-  return url;
+  return u;
 }
 
-// Evita cache da imagem (às vezes o navegador “trava” a primeira falha)
-function withCacheBuster(imgUrl){
-  if (!imgUrl) return "";
-  const sep = imgUrl.includes("?") ? "&" : "?";
-  return `${imgUrl}${sep}t=${Date.now()}`;
+// Alternativa do Drive (às vezes funciona melhor)
+function driveAlt(u){
+  const m = u.match(/uc\?export=view&id=([a-zA-Z0-9_-]+)/);
+  if (m && m[1]) return `https://drive.google.com/uc?export=download&id=${m[1]}`;
+  return u;
 }
 
-// Render de IMG com fallback (se falhar, esconde)
-function imgTag(url, cls, alt){
-  const safe = withCacheBuster(url);
-  return `<img class="${cls}" src="${safe}" alt="${alt}"
-    referrerpolicy="no-referrer"
-    crossorigin="anonymous"
-    onerror="this.style.display='none';">`;
+// Cache buster pra não “grudar” falha
+function bust(u){
+  if (!u) return u;
+  const sep = u.includes("?") ? "&" : "?";
+  return `${u}${sep}t=${Date.now()}`;
+}
+
+function makeImg(photoUrl, cls, alt){
+  const img = document.createElement("img");
+  img.className = cls;
+  img.alt = alt;
+  img.referrerPolicy = "no-referrer";
+  img.crossOrigin = "anonymous";
+
+  const initial = photoUrl ? bust(photoUrl) : PLACEHOLDER;
+  img.src = initial;
+
+  img.onerror = () => {
+    // tenta alternativa 1x, depois placeholder
+    if (photoUrl && photoUrl.includes("drive.google.com") && !img.dataset.triedAlt) {
+      img.dataset.triedAlt = "1";
+      const altUrl = bust(driveAlt(photoUrl));
+      console.log("Falhou, tentando alternativa:", altUrl);
+      img.src = altUrl;
+      return;
+    }
+    console.log("Falhou definitivo, usando placeholder:", photoUrl);
+    img.src = PLACEHOLDER;
+  };
+
+  return img;
 }
 
 function updateTime(){
@@ -145,66 +176,82 @@ async function load(){
   const status = document.getElementById("status");
   status.textContent = "";
 
-  try{
-    const res = await fetch(url, { cache: "no-store" });
-    const text = await res.text();
-    const data = parseGViz(text);
+  const res = await fetch(url, { cache: "no-store" });
+  const text = await res.text();
+  const data = parseGViz(text);
 
-    const rows = (data.table.rows || []).map(r => ({
-      name: r.c?.[0]?.v || "",
-      pts: r.c?.[1]?.v || 0,
-      photo: normalizeDriveImage(r.c?.[2]?.v || "")
-    })).filter(x => x.name);
+  const rows = (data.table.rows || []).map(r => {
+    const name = r.c?.[0]?.v || "";
+    const pts = r.c?.[1]?.v || 0;
+    const photoRaw = r.c?.[2]?.v || "";
+    const photoFinal = normalizeDriveImage(photoRaw);
+    return { name, pts, photoRaw, photoFinal };
+  }).filter(x => x.name);
 
-    // PODIUM TOP 5
-    const podium = document.getElementById("podium");
-    podium.innerHTML = "";
-    const styles = ["gold","silver","bronze","",""];
+  console.log("Rows (debug):", rows);
 
-    rows.slice(0,5).forEach((p,i)=>{
-      const div = document.createElement("div");
-      div.className = "card " + styles[i];
+  const podium = document.getElementById("podium");
+  podium.innerHTML = "";
+  const styles = ["gold","silver","bronze","",""];
 
-      const photoHtml = p.photo ? imgTag(p.photo, "avatar", `Foto de ${p.name}`) : "";
+  rows.slice(0,5).forEach((p,i)=>{
+    const div = document.createElement("div");
+    div.className = "card " + styles[i];
 
-      div.innerHTML = `
-        ${photoHtml}
-        <h3>${i+1}º Lugar</h3>
-        <strong>${p.name}</strong>
-        <p>${p.pts} pontos</p>
-      `;
-      podium.appendChild(div);
-    });
+    div.appendChild(makeImg(p.photoFinal, "avatar", `Foto de ${p.name}`));
 
-    // TABELA COMPLETA
-    const tbody = document.getElementById("tbody");
-    tbody.innerHTML = "";
+    const h3 = document.createElement("h3");
+    h3.textContent = `${i+1}º Lugar`;
+    div.appendChild(h3);
 
-    rows.forEach((p,i)=>{
-      const tr = document.createElement("tr");
-      const photoHtml = p.photo ? imgTag(p.photo, "avatar-sm", `Foto de ${p.name}`) : "";
+    const strong = document.createElement("strong");
+    strong.textContent = p.name;
+    div.appendChild(strong);
 
-      tr.innerHTML = `
-        <td>${i+1}</td>
-        <td>
-          <div class="rowflex">
-            ${photoHtml}
-            <span>${p.name}</span>
-          </div>
-        </td>
-        <td class="right">${p.pts}</td>
-      `;
-      tbody.appendChild(tr);
-    });
+    const pp = document.createElement("p");
+    pp.textContent = `${p.pts} pontos`;
+    div.appendChild(pp);
 
-    updateTime();
-  }catch(err){
-    status.textContent = "Erro ao carregar dados: " + (err?.message || err);
-  }
+    podium.appendChild(div);
+  });
+
+  const tbody = document.getElementById("tbody");
+  tbody.innerHTML = "";
+
+  rows.forEach((p,i)=>{
+    const tr = document.createElement("tr");
+
+    const td1 = document.createElement("td");
+    td1.textContent = i+1;
+
+    const td2 = document.createElement("td");
+    const rf = document.createElement("div");
+    rf.className = "rowflex";
+    rf.appendChild(makeImg(p.photoFinal, "avatar-sm", `Foto de ${p.name}`));
+
+    const sp = document.createElement("span");
+    sp.textContent = p.name;
+    rf.appendChild(sp);
+    td2.appendChild(rf);
+
+    const td3 = document.createElement("td");
+    td3.className = "right";
+    td3.textContent = p.pts;
+
+    tr.appendChild(td1);
+    tr.appendChild(td2);
+    tr.appendChild(td3);
+    tbody.appendChild(tr);
+  });
+
+  updateTime();
 }
 
-load();
-setInterval(load, 60000);
+load().catch(err => {
+  document.getElementById("status").textContent = "Erro ao carregar: " + (err?.message || err);
+  console.error(err);
+});
+setInterval(() => load().catch(console.error), 60000);
 </script>
 
 </body>
