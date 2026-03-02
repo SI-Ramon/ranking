@@ -6,38 +6,56 @@
 <title>Ranking - Desbravadores</title>
 
 <style>
-/* ===== base ===== */
+/* ===== BODY / BACKGROUND ===== */
+/* Usei a imagem do GitHub Pages (Desbravadores.jpg) com overlay escuro */
 body{
   font-family: Arial, sans-serif;
-  margin:0;
-  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-  color:#fff;
-  min-height:100vh;
+  margin: 0;
+  min-height: 100vh;
+  color: #fff;
+
+  background-image:
+    linear-gradient(rgba(12,25,30,0.60), rgba(12,25,30,0.60)),
+    url('https://si-ramon.github.io/ranking/img/Desbravadores.jpg');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
+
+/* No mobile, background-attachment: fixed pode dar problema - usar scroll */
+@media (max-width: 480px){
+  body{
+    background-attachment: scroll;
+    background-position: center top;
+  }
+}
+
+/* ===== layout ===== */
 .wrap{
   max-width:1000px;
   margin:auto;
   padding:30px;
   padding-bottom:110px; /* espaço para o footer fixo */
 }
-h1{text-align:center;}
-/* vamos remover o updated do topo, ele estará no footer */
+h1{text-align:center;margin:0 0 12px;}
+/* subtítulo removido do topo (agora é no rodapé) */
 
 /* ===== podium grid ===== */
 .podium{
   display:grid;
   grid-template-columns:repeat(5,1fr);
   gap:15px;
-  margin-bottom:40px;
+  margin: 18px 0 40px;
   justify-items:center;
 }
 
 /* ===== card ===== */
 .card{
-  position: relative;
-  overflow: visible;
-  background: rgba(255,255,255,.1);
-  padding: 24px 20px 20px;
+  position: relative;       /* necessário para posicionar avatar absoluto */
+  overflow: visible;        /* permite avatar "sair" do card sem ser cortado */
+  background: rgba(255,255,255,.08);
+  padding: 34px 20px 20px;  /* top padding para espaçar conteúdo abaixo do avatar */
   border-radius: 15px;
   text-align: center;
   min-height: 260px;
@@ -46,11 +64,13 @@ h1{text-align:center;}
   align-items: center;
   justify-content: flex-end;
   box-sizing: border-box;
+  transition: transform .18s ease;
 }
+.card:hover{ transform: translateY(-6px); }
 
-.gold { background: rgba(255,215,0,.35); }
-.silver { background: rgba(192,192,192,.30); }
-.bronze { background: rgba(205,127,50,.30); }
+.gold { background: rgba(255,215,0,.34); }
+.silver { background: rgba(192,192,192,.28); }
+.bronze { background: rgba(205,127,50,.28); }
 
 /* ===== avatares ===== */
 .avatar{
@@ -79,16 +99,16 @@ h1{text-align:center;}
 }
 
 /* ===== texto dentro do card ===== */
-.card h3{ margin-top: 10px; margin-bottom: 8px; font-size:18px; }
-.card strong{ display:block; font-size:18px; margin-bottom:8px; }
+.card h3{ margin-top: 10px; margin-bottom: 8px; font-size:18px; color:#fff; }
+.card strong{ display:block; font-size:18px; margin-bottom:8px; color:#fff; }
 .card p{ margin:0; font-size:16px; color: #fff; opacity: .95; }
 
 /* ===== tabela ===== */
-table{width:100%;border-collapse:collapse;}
-th,td{padding:10px;border-bottom:1px solid rgba(255,255,255,.12);}
-th{text-align:left;}
+table{width:100%;border-collapse:collapse;margin-top:8px;}
+th,td{padding:12px;border-bottom:1px solid rgba(255,255,255,.12);}
+th{text-align:left; font-weight:600;}
 .right{text-align:right;}
-.rowflex{display:flex;align-items:center;gap:10px;}
+.rowflex{display:flex;align-items:center;gap:12px;}
 .muted{opacity:.75;font-size:.9rem;margin-top:10px;}
 
 /* ===== footer (rodapé fixo) ===== */
@@ -97,9 +117,9 @@ th{text-align:left;}
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(180deg, rgba(12,25,30,0.0), rgba(0,0,0,0.35));
+  background: linear-gradient(180deg, rgba(12,25,30,0.0), rgba(0,0,0,0.45));
   border-top: 1px solid rgba(255,255,255,0.06);
-  padding: 10px 0;
+  padding: 12px 0;
   text-align: center;
   color: #fff;
   z-index: 1000;
@@ -107,30 +127,30 @@ th{text-align:left;}
 }
 .page-footer .updated {
   font-size: 0.95rem;
-  opacity: .9;
+  opacity: .95;
 }
 
 /* ===== responsivo ===== */
 @media (max-width: 900px){
   .podium{ grid-template-columns: repeat(3, 1fr); gap:14px; }
-  .card{ min-height: 260px; padding-top: 34px; }
+  .card{ min-height: 260px; padding-top: 48px; }
   .avatar{ width: 88px; height:88px; top: -44px; }
 }
 
 @media (max-width: 480px){
-  .podium{ grid-template-columns: repeat(3, 1fr); gap:10px; }
-  .card{ min-height: 240px; padding-top: 32px; border-radius: 18px; }
+  .podium{ grid-template-columns: repeat(3, 1fr); gap:10px; margin-bottom:30px; }
+  .card{ min-height: 240px; padding-top: 42px; border-radius: 18px; }
   .avatar{ width: 76px; height:76px; top: -38px; }
   .card h3{ font-size:16px; }
   .card strong{ font-size:16px; }
   .card p{ font-size:14px; }
-
   th, td{ padding: 8px; }
 }
 
+/* muito pequeno (ex.: <360px), empilha 1 por vez se desejar */
 @media (max-width: 320px){
   .podium{ grid-template-columns: repeat(1, 1fr); }
-  .card{ min-height: 220px; padding-top: 28px; }
+  .card{ min-height: 220px; padding-top: 32px; }
   .avatar{ width:70px; height:70px; top:-35px; }
 }
 </style>
@@ -142,13 +162,13 @@ th{text-align:left;}
 
   <div class="podium" id="podium"></div>
 
-  <h2>📋 Ranking Completo</h2>
+  <h2 style="margin-top:6px;">📋 Ranking Completo</h2>
   <table>
     <thead>
       <tr>
-        <th>#</th>
+        <th style="width:48px">#</th>
         <th>Desbravador</th>
-        <th class="right">Pontos</th>
+        <th class="right" style="width:120px">Pontos</th>
       </tr>
     </thead>
     <tbody id="tbody"></tbody>
@@ -164,8 +184,9 @@ th{text-align:left;}
 
 <script>
 /* -------------------------
-  JS (mantive funcionalidade anterior)
+  JS: busca A (nome), B (pontos), C (foto) na aba RANKING
 ---------------------------*/
+
 const SHEET_ID = "1XSBKPMg4nlzAJpACvZ5hCumqOyFPFIIRqV60gghP43E";
 const SHEET_NAME = "RANKING";
 const query = encodeURIComponent("select A, B, C where A is not null order by B desc");
@@ -178,131 +199,170 @@ function parseGViz(text){
   return JSON.parse(text.substring(start, end + 1));
 }
 
+/* Normaliza links do Drive / aceita =IMAGE("...") e links comuns */
 function normalizeDriveImage(raw){
   if (!raw) return "";
   let u = String(raw).trim();
+
+  // se veio =IMAGE("..."), extrai a URL
   const mImg = u.match(/IMAGE\(\"(.*)\"\)/i);
   if (mImg && mImg[1]) u = mImg[1].trim();
+
+  // drive file/d/ID
   const m1 = u.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
   if (m1 && m1[1]) return `https://drive.google.com/uc?export=view&id=${m1[1]}`;
+
+  // drive open?id=ID
   const m2 = u.match(/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/);
   if (m2 && m2[1]) return `https://drive.google.com/uc?export=view&id=${m2[1]}`;
+
+  // já com id=... e é do drive
   const m3 = u.match(/[?&]id=([a-zA-Z0-9_-]+)/);
   if (m3 && m3[1] && u.includes("drive.google.com")) {
     return `https://drive.google.com/uc?export=view&id=${m3[1]}`;
   }
+
+  // se não bateu com Drive, retorna a URL como vem
   return u;
 }
+
+/* Alternativa 'download' (tentativa caso view falhe) */
 function driveAlt(u){
   const m = u.match(/uc\?export=view&id=([a-zA-Z0-9_-]+)/);
   if (m && m[1]) return `https://drive.google.com/uc?export=download&id=${m[1]}`;
   return u;
 }
+
+/* cache-buster para forçar recarregar imagem quando necessário */
 function bust(u){
   if (!u) return u;
   const sep = u.includes("?") ? "&" : "?";
   return `${u}${sep}t=${Date.now()}`;
 }
+
+/* Cria elemento <img> com fallback para tentar driveAlt e depois deixar sem src (background neutro) */
 function makeImg(photoUrl, cls, alt){
   const img = document.createElement("img");
   img.className = cls;
   img.alt = alt;
   img.referrerPolicy = "no-referrer";
   img.crossOrigin = "anonymous";
+
   const initial = photoUrl ? bust(photoUrl) : '';
   img.src = initial || '';
+
   img.onerror = () => {
+    // tenta alternativa do Drive (uma vez)
     if (photoUrl && photoUrl.includes("drive.google.com") && !img.dataset.triedAlt) {
       img.dataset.triedAlt = "1";
       const altUrl = bust(driveAlt(photoUrl));
       img.src = altUrl;
       return;
     }
+    // se falhar, removemos o src (CSS deixa um fundo neutro)
     img.src = '';
   };
+
   return img;
 }
 
+/* atualiza texto de "Atualizado em:" no rodapé */
 function updateTime(){
   const el = document.getElementById("updated");
   if (!el) return;
   el.innerText = "Atualizado em: " + new Date().toLocaleString("pt-BR");
 }
 
+/* Carrega dados e renderiza */
 async function load(){
   const status = document.getElementById("status");
   status.textContent = "";
-  const res = await fetch(url, { cache: "no-store" });
-  const text = await res.text();
-  const data = parseGViz(text);
-  const rows = (data.table.rows || []).map(r => {
-    const name = r.c?.[0]?.v || "";
-    const pts = r.c?.[1]?.v || 0;
-    const photoRaw = r.c?.[2]?.v || "";
-    const photoFinal = normalizeDriveImage(photoRaw);
-    return { name, pts, photoRaw, photoFinal };
-  }).filter(x => x.name);
 
-  const podium = document.getElementById("podium");
-  podium.innerHTML = "";
-  const styles = ["gold","silver","bronze","",""];
+  try {
+    const res = await fetch(url, { cache: "no-store" });
+    const text = await res.text();
+    const data = parseGViz(text);
 
-  rows.slice(0,5).forEach((p,i)=>{
-    const div = document.createElement("div");
-    div.className = "card " + styles[i];
-    const img = makeImg(p.photoFinal, "avatar", `Foto de ${p.name}`);
-    div.appendChild(img);
+    const rows = (data.table.rows || []).map(r => {
+      const name = r.c?.[0]?.v || "";
+      const pts = r.c?.[1]?.v || 0;
+      const photoRaw = r.c?.[2]?.v || "";
+      const photoFinal = normalizeDriveImage(photoRaw);
+      return { name, pts, photoRaw, photoFinal };
+    }).filter(x => x.name);
 
-    const h3 = document.createElement("h3");
-    h3.textContent = `${i+1}º Lugar`;
-    div.appendChild(h3);
+    // PODIUM
+    const podium = document.getElementById("podium");
+    podium.innerHTML = "";
+    const styles = ["gold","silver","bronze","",""];
 
-    const strong = document.createElement("strong");
-    strong.textContent = p.name;
-    div.appendChild(strong);
+    rows.slice(0,5).forEach((p,i)=>{
+      const div = document.createElement("div");
+      div.className = "card " + styles[i];
 
-    const pEl = document.createElement("p");
-    pEl.textContent = `${p.pts} pontos`;
-    div.appendChild(pEl);
+      const img = makeImg(p.photoFinal, "avatar", `Foto de ${p.name}`);
+      div.appendChild(img);
 
-    podium.appendChild(div);
-  });
+      const h3 = document.createElement("h3");
+      h3.textContent = `${i+1}º Lugar`;
+      div.appendChild(h3);
 
-  // TABELA
-  const tbody = document.getElementById("tbody");
-  tbody.innerHTML = "";
-  rows.forEach((p,i)=>{
-    const tr = document.createElement("tr");
-    const tdPos = document.createElement("td");
-    tdPos.textContent = i+1;
-    const tdName = document.createElement("td");
-    const wrap = document.createElement("div");
-    wrap.className = "rowflex";
-    const photo = makeImg(p.photoFinal, "avatar-sm", `Foto de ${p.name}`);
-    wrap.appendChild(photo);
-    const span = document.createElement("span");
-    span.textContent = p.name;
-    wrap.appendChild(span);
-    tdName.appendChild(wrap);
-    const tdPts = document.createElement("td");
-    tdPts.className = "right";
-    tdPts.textContent = p.pts;
-    tr.appendChild(tdPos);
-    tr.appendChild(tdName);
-    tr.appendChild(tdPts);
-    tbody.appendChild(tr);
-  });
+      const strong = document.createElement("strong");
+      strong.textContent = p.name;
+      div.appendChild(strong);
 
-  updateTime();
+      const pEl = document.createElement("p");
+      pEl.textContent = `${p.pts} pontos`;
+      div.appendChild(pEl);
+
+      podium.appendChild(div);
+    });
+
+    // TABELA
+    const tbody = document.getElementById("tbody");
+    tbody.innerHTML = "";
+
+    rows.forEach((p,i)=>{
+      const tr = document.createElement("tr");
+
+      const tdPos = document.createElement("td");
+      tdPos.textContent = i+1;
+
+      const tdName = document.createElement("td");
+      const wrap = document.createElement("div");
+      wrap.className = "rowflex";
+      const photo = makeImg(p.photoFinal, "avatar-sm", `Foto de ${p.name}`);
+      wrap.appendChild(photo);
+
+      const span = document.createElement("span");
+      span.textContent = p.name;
+      wrap.appendChild(span);
+
+      tdName.appendChild(wrap);
+
+      const tdPts = document.createElement("td");
+      tdPts.className = "right";
+      tdPts.textContent = p.pts;
+
+      tr.appendChild(tdPos);
+      tr.appendChild(tdName);
+      tr.appendChild(tdPts);
+
+      tbody.appendChild(tr);
+    });
+
+    updateTime();
+  } catch (err) {
+    status.textContent = "Erro ao carregar dados: " + (err?.message || err);
+    console.error(err);
+  }
 }
 
 load().catch(err => {
   document.getElementById("status").textContent = "Erro ao carregar: " + (err?.message || err);
   console.error(err);
 });
-setInterval(() => {
-  load().catch(console.error);
-}, 60000);
+setInterval(() => load().catch(console.error), 60000);
 </script>
 
 </body>
