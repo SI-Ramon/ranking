@@ -101,7 +101,7 @@ h1.title {
 /* ===== avatar ===== */
 .avatar{
   position: absolute;
-  top: 8px;
+  top: 20px;   /* foto um pouco mais baixa */
   left: 50%;
   transform: translateX(-50%);
   width: 92px;
@@ -109,6 +109,10 @@ h1.title {
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid rgba(255,255,255,.35);
+  background: rgba(0,0,0,.12);
+  z-index: 2;
+  box-shadow: 0 6px 18px rgba(0,0,0,.35);
+  display: block;
 }
 
 /* avatar tabela */
@@ -353,3 +357,4 @@ setInterval(load,60000);
 
 </body>
 </html>
+
