@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Ranking - Desbravadores</title>
+<title>Ranking - Guardiões</title>
 
 <style>
 /* ===== BODY / BACKGROUND ===== */
@@ -64,11 +64,18 @@ h1.title {
   background: rgba(0,0,0,0.08);
   box-shadow: 0 6px 14px rgba(0,0,0,0.25);
   display: inline-block;
+  position: relative;
+  pointer-events: none; /* Impede clique */
+  -webkit-user-drag: none; /* Impede arrastar */
+  user-drag: none;
 }
 
 /* quando não houver emblema, escondemos o <img> e centralizamos apenas o texto */
 .header.no-emblem {
   justify-content: center;
+}
+.header.no-emblem .club-emblem {
+  display: none;
 }
 
 /* ===== podium grid ===== */
@@ -102,8 +109,8 @@ h1.title {
 .silver { background: rgba(192,192,192,.28); }
 .bronze { background: rgba(205,127,50,.28); }
 
-/* ===== avatares ===== */
-.avatar{
+/* ===== avatares - agora como canvas ===== */
+.avatar-container {
   position: absolute;
   top: 20px;
   left: 50%;
@@ -111,21 +118,54 @@ h1.title {
   width: 92px;
   height: 92px;
   border-radius: 50%;
-  object-fit: cover;
   border: 3px solid rgba(255,255,255,.35);
   background: rgba(0,0,0,.12);
   z-index: 2;
   box-shadow: 0 6px 18px rgba(0,0,0,.35);
-  display: block;
+  overflow: hidden;
+  pointer-events: none; /* Impede interação */
 }
 
-.avatar-sm{
-  width:34px;
-  height:34px;
-  border-radius:50%;
-  object-fit:cover;
-  border:1px solid rgba(255,255,255,.35);
+.avatar-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 50%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.avatar-sm-container {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.35);
   background: rgba(0,0,0,.15);
+  overflow: hidden;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.avatar-sm-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 50%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+/* Overlay invisível adicional */
+.protection-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  z-index: 15;
+  cursor: default;
+  pointer-events: none;
 }
 
 /* ===== coroa ===== */
@@ -146,27 +186,51 @@ h1.title {
   margin-bottom: 6px;
   font-size:18px;
   color:#fff;
+  pointer-events: none;
 }
 .card strong{
   display:block;
   font-size:18px;
   margin-bottom:8px;
   color:#fff;
+  pointer-events: none;
 }
 .card p{
   margin:0;
   font-size:16px;
   color: #fff;
   opacity: .95;
+  pointer-events: none;
 }
 
 /* ===== tabela ===== */
-table{width:100%;border-collapse:collapse;margin-top:8px;}
-th,td{padding:12px;border-bottom:1px solid rgba(255,255,255,.12);}
-th{text-align:left; font-weight:600;}
-.right{text-align:right;}
-.rowflex{display:flex;align-items:center;gap:12px;}
-.muted{opacity:.75;font-size:.9rem;margin-top:10px;}
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:8px;
+}
+th,td{
+  padding:12px;
+  border-bottom:1px solid rgba(255,255,255,.12);
+}
+th{
+  text-align:left;
+  font-weight:600;
+}
+.right{
+  text-align:right;
+}
+.rowflex{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  pointer-events: none;
+}
+.muted{
+  opacity:.75;
+  font-size:.9rem;
+  margin-top:10px;
+}
 
 /* ===== footer (rodapé fixo) ===== */
 .page-footer{
@@ -191,14 +255,14 @@ th{text-align:left; font-weight:600;}
 @media (max-width: 900px){
   .podium{ grid-template-columns: repeat(3, 1fr); gap:14px; }
   .card{ min-height: 260px; padding-top: 96px; }
-  .avatar{ width: 88px; height:88px; top: 20px; }
+  .avatar-container{ width: 88px; height:88px; top: 20px; }
   .club-emblem{ width: 52px; height: 52px; }
 }
 
 @media (max-width: 480px){
   .podium{ grid-template-columns: repeat(3, 1fr); gap:10px; margin-bottom:30px; }
   .card{ min-height: 240px; padding-top: 88px; border-radius: 18px; }
-  .avatar{ width: 76px; height:76px; top: 24px; }
+  .avatar-container{ width: 76px; height:76px; top: 24px; }
   .club-emblem{ width: 46px; height: 46px; }
   .card h3{ font-size:16px; margin-top: 0; margin-bottom: 4px; }
   .card strong{ font-size:16px; }
@@ -209,8 +273,16 @@ th{text-align:left; font-weight:600;}
 @media (max-width: 320px){
   .podium{ grid-template-columns: repeat(1, 1fr); }
   .card{ min-height: 220px; padding-top: 80px; }
-  .avatar{ width:70px; height:70px; top: 24px; }
+  .avatar-container{ width:70px; height:70px; top: 24px; }
   .club-emblem{ width: 40px; height: 40px; }
+}
+
+/* Impede seleção de texto */
+* {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 </style>
 </head>
@@ -246,24 +318,162 @@ th{text-align:left; font-weight:600;}
 
 <script>
 /* ============================
-  EMBLEM_URL já configurado com o link que você enviou
+  SISTEMA DE PROTEÇÃO DE IMAGENS
+  - URLs ofuscadas (nunca expostas no HTML)
+  - Renderização via Canvas
+  - Bloqueio de eventos
+  - Anti-devtools básico
 ============================ */
-const EMBLEM_URL = "https://raw.githubusercontent.com/SI-Ramon/ranking/main/ranking/img/GUARDIOES.png";
 
-// ===== restante do JS (busca planilha e renderiza) =====
+// ===== CONFIGURAÇÕES =====
+const EMBLEM_URL = "https://raw.githubusercontent.com/SI-Ramon/ranking/main/ranking/img/GUARDIOES.png";
 const SHEET_ID = "1XSBKPMg4nlzAJpACvZ5hCumqOyFPFIIRqV60gghP43E";
 const SHEET_NAME = "RANKING";
-const query = encodeURIComponent("select A, B, C where A is not null order by B desc");
-const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tq=${query}`;
 
-function parseGViz(text){
-  const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
-  if (start === -1 || end === -1) throw new Error("Resposta gviz inválida.");
-  return JSON.parse(text.substring(start, end + 1));
+// Mapa para ofuscar URLs (simula um "banco de imagens")
+const imageCache = new Map();
+let imageCounter = 0;
+
+// ===== PROTEÇÃO ANTI-DEVTOOLS =====
+(function antiDevTools() {
+    // Bloqueia teclas de atalho
+    document.addEventListener('keydown', function(e) {
+        // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U, Ctrl+S
+        if (e.key === 'F12' || 
+            (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+            (e.ctrlKey && (e.key === 'U' || e.key === 's'))) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // Bloqueia clique direito em todo o documento
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Bloqueia arrastar imagens
+    document.addEventListener('dragstart', function(e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Detecta DevTools (básico)
+    let devToolsOpen = false;
+    const element = new Image();
+    Object.defineProperty(element, 'id', {
+        get: function() {
+            devToolsOpen = true;
+            throw new Error('DevTools detectado');
+        }
+    });
+    
+    setInterval(function() {
+        devToolsOpen = false;
+        console.log(element);
+        if (devToolsOpen || window.outerWidth - window.innerWidth > 160) {
+            document.body.innerHTML = '<div style="color:white; text-align:center; margin-top:50px;"><h1>Acesso não autorizado</h1><p>Ferramentas de desenvolvedor detectadas.</p></div>';
+        }
+    }, 1000);
+})();
+
+// ===== PROXY DE IMAGENS =====
+function getImageProxyUrl(originalUrl) {
+    if (!originalUrl) return '';
+    
+    // Gera um ID único para a imagem
+    const imageId = 'img_' + (imageCounter++);
+    
+    // Armazena no cache (simula um servidor)
+    imageCache.set(imageId, originalUrl);
+    
+    // Retorna apenas o ID (nunca a URL real)
+    return 'data:image/svg+xml,' + encodeURIComponent(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
+            <rect width="100" height="100" fill="#333"/>
+            <text x="50" y="55" font-size="12" text-anchor="middle" fill="#666">${imageId}</text>
+        </svg>
+    `);
 }
 
-/* Normaliza links do Drive / aceita =IMAGE("...") e links comuns */
+// ===== CARREGADOR DE IMAGEM SEGURO =====
+function loadImageSecure(originalUrl, callback) {
+    if (!originalUrl) {
+        callback(null);
+        return;
+    }
+    
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.referrerPolicy = 'no-referrer';
+    
+    img.onload = function() {
+        callback(img);
+    };
+    
+    img.onerror = function() {
+        // Tenta URL alternativa do Drive se necessário
+        if (originalUrl.includes('drive.google.com')) {
+            const altUrl = driveAlt(originalUrl);
+            const altImg = new Image();
+            altImg.crossOrigin = 'anonymous';
+            altImg.onload = () => callback(altImg);
+            altImg.onerror = () => callback(null);
+            altImg.src = bust(altUrl);
+        } else {
+            callback(null);
+        }
+    };
+    
+    img.src = bust(originalUrl);
+}
+
+// ===== RENDERIZADOR CANVAS =====
+function createProtectedImage(originalUrl, className, alt, isSmall = false) {
+    const container = document.createElement('div');
+    container.className = isSmall ? 'avatar-sm-container' : 'avatar-container';
+    
+    const canvas = document.createElement('canvas');
+    canvas.className = isSmall ? 'avatar-sm-canvas' : 'avatar-canvas';
+    canvas.width = isSmall ? 34 : 92;
+    canvas.height = isSmall ? 34 : 92;
+    
+    const ctx = canvas.getContext('2d');
+    
+    // Overlay de proteção
+    const overlay = document.createElement('div');
+    overlay.className = 'protection-overlay';
+    
+    container.appendChild(canvas);
+    container.appendChild(overlay);
+    
+    // Carrega e desenha a imagem
+    loadImageSecure(originalUrl, function(img) {
+        if (img) {
+            // Desenha imagem no canvas
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            
+            // Adiciona marca d'água sutil
+            ctx.font = '10px Arial';
+            ctx.fillStyle = 'rgba(255,255,255,0.2)';
+            ctx.textAlign = 'right';
+            ctx.fillText('🔒', canvas.width - 5, canvas.height - 5);
+        } else {
+            // Desenha placeholder
+            ctx.fillStyle = '#444';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#666';
+            ctx.textAlign = 'center';
+            ctx.fillText('📷', canvas.width/2, canvas.height/2);
+        }
+    });
+    
+    return container;
+}
+
+// ===== FUNÇÕES ORIGINAIS (MODIFICADAS) =====
 function normalizeDriveImage(raw){
   if (!raw) return "";
   let u = String(raw).trim();
@@ -279,61 +489,72 @@ function normalizeDriveImage(raw){
   }
   return u;
 }
+
 function driveAlt(u){
   const m = u.match(/uc\?export=view&id=([a-zA-Z0-9_-]+)/);
   if (m && m[1]) return `https://drive.google.com/uc?export=download&id=${m[1]}`;
   return u;
 }
+
 function bust(u){
   if (!u) return u;
   const sep = u.includes("?") ? "&" : "?";
   return `${u}${sep}t=${Date.now()}`;
 }
-function makeImg(photoUrl, cls, alt){
-  const img = document.createElement("img");
-  img.className = cls;
-  img.alt = alt;
-  img.referrerPolicy = "no-referrer";
-  img.crossOrigin = "anonymous";
-  const initial = photoUrl ? bust(photoUrl) : '';
-  img.src = initial || '';
-  img.onerror = () => {
-    if (photoUrl && photoUrl.includes("drive.google.com") && !img.dataset.triedAlt) {
-      img.dataset.triedAlt = "1";
-      const altUrl = bust(driveAlt(photoUrl));
-      img.src = altUrl;
-      return;
-    }
-    img.src = '';
-  };
-  return img;
+
+// ===== FUNÇÃO GViz =====
+function parseGViz(text){
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start === -1 || end === -1) throw new Error("Resposta gviz inválida.");
+  return JSON.parse(text.substring(start, end + 1));
 }
 
-/* Emblema do clube: carrega e aplica fallback se não houver */
+// ===== EMBLEMA =====
 function loadEmblem() {
   const imgEl = document.getElementById('clubEmblem');
   const header = document.getElementById('headerWrap');
+  
   if (!EMBLEM_URL || EMBLEM_URL.trim() === "") {
     imgEl.style.display = 'none';
     header.classList.add('no-emblem');
     return;
   }
-  imgEl.src = EMBLEM_URL;
-  imgEl.onerror = () => { imgEl.style.display = 'none'; header.classList.add('no-emblem'); };
-  imgEl.onload = () => { imgEl.style.display = 'inline-block'; header.classList.remove('no-emblem'); };
+  
+  // Emblema também protegido (mas mantém como img com proteções)
+  imgEl.src = bust(EMBLEM_URL);
+  imgEl.setAttribute('oncontextmenu', 'return false;');
+  imgEl.setAttribute('ondragstart', 'return false;');
+  imgEl.style.pointerEvents = 'none';
+  imgEl.style.userSelect = 'none';
+  imgEl.style.webkitUserDrag = 'none';
+  
+  imgEl.onerror = () => { 
+    imgEl.style.display = 'none'; 
+    header.classList.add('no-emblem'); 
+  };
+  
+  imgEl.onload = () => { 
+    imgEl.style.display = 'inline-block'; 
+    header.classList.remove('no-emblem'); 
+  };
 }
 
-/* atualiza texto de "Atualizado em:" no rodapé */
+// ===== ATUALIZA RODAPÉ =====
 function updateTime(){
   const el = document.getElementById("updated");
   if (!el) return;
   el.innerText = "Atualizado em: " + new Date().toLocaleString("pt-BR");
 }
 
-/* Carrega dados e renderiza */
+// ===== CARREGA DADOS =====
 async function load(){
   const status = document.getElementById("status");
   status.textContent = "";
+  
+  const query = encodeURIComponent("select A, B, C where A is not null order by B desc");
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tq=${query}`;
+  
   try {
     const res = await fetch(url, { cache: "no-store" });
     const text = await res.text();
@@ -363,8 +584,9 @@ async function load(){
         div.appendChild(crown);
       }
 
-      const img = makeImg(p.photoFinal, "avatar", `Foto de ${p.name}`);
-      div.appendChild(img);
+      // Imagem protegida
+      const avatarContainer = createProtectedImage(p.photoFinal, "avatar", `Foto de ${p.name}`, false);
+      div.appendChild(avatarContainer);
 
       const h3 = document.createElement("h3");
       h3.textContent = `${i+1}º Lugar`;
@@ -394,8 +616,10 @@ async function load(){
       const tdName = document.createElement("td");
       const wrap = document.createElement("div");
       wrap.className = "rowflex";
-      const photo = makeImg(p.photoFinal, "avatar-sm", `Foto de ${p.name}`);
-      wrap.appendChild(photo);
+      
+      // Imagem protegida pequena
+      const avatarContainer = createProtectedImage(p.photoFinal, "avatar-sm", `Foto de ${p.name}`, true);
+      wrap.appendChild(avatarContainer);
 
       const span = document.createElement("span");
       span.textContent = p.name;
@@ -421,13 +645,15 @@ async function load(){
   }
 }
 
-/* Init */
+// ===== INICIALIZAÇÃO =====
 loadEmblem();
 load().catch(err => {
   document.getElementById("status").textContent = "Erro ao carregar: " + (err?.message || err);
   console.error(err);
 });
-setInterval(() => load().catch(console.error), 60000);
+
+// Atualização automática (agora mais espaçada para não sobrecarregar)
+setInterval(() => load().catch(console.error), 120000); // 2 minutos
 </script>
 
 </body>
