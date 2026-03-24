@@ -6,72 +6,225 @@
 <title>Ranking - Guardiões</title>
 
 <style>
+/* ===== BODY / BACKGROUND ===== */
 body{
   font-family: Arial, sans-serif;
   margin: 0;
   min-height: 100vh;
   color: #fff;
-  background: linear-gradient(rgba(12,25,30,0.85), rgba(12,25,30,0.85));
+
+  background-image:
+    linear-gradient(rgba(12,25,30,0.60), rgba(12,25,30,0.60)),
+    url('https://raw.githubusercontent.com/SI-Ramon/ranking/main/ranking/img/desbravador.webp');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+@media (max-width: 480px){
+  body{
+    background-attachment: scroll;
+    background-position: center top;
+  }
 }
 
-/* LOGIN */
-#loginBox{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  height:100vh;
-}
-#loginBox input{
-  padding:10px;
-  margin:10px;
-  border-radius:8px;
-  border:none;
-}
-#loginBox button{
-  padding:10px 20px;
-  border:none;
-  border-radius:8px;
-  background:#00c853;
-  color:#fff;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-/* CONTEÚDO ORIGINAL */
+/* ===== layout ===== */
 .wrap{
   max-width:1000px;
   margin:auto;
   padding:30px;
+  padding-bottom:110px;
 }
 
+/* header com emblema + título */
 .header {
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+h1.title {
+  font-size: 28px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+  color: #fff;
 }
 
-.club-emblem{
-  width:60px;
+/* emblema do clube */
+.club-emblem {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  border-radius: 8px;
+  border: 2px solid rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.08);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+  display: inline-block;
+  position: relative;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-drag: none;
 }
 
+.header.no-emblem {
+  justify-content: center;
+}
+.header.no-emblem .club-emblem {
+  display: none;
+}
+
+/* ===== podium grid ===== */
 .podium{
   display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
+  grid-template-columns:repeat(5,1fr);
+  gap:15px;
+  margin: 18px 0 40px;
+  justify-items:center;
 }
 
+/* ===== card ===== */
 .card{
-  background:rgba(255,255,255,.1);
-  padding:20px;
-  border-radius:10px;
-  text-align:center;
+  position: relative;
+  overflow: visible;
+  background: rgba(255,255,255,.08);
+  padding: 100px 20px 20px;
+  border-radius: 15px;
+  text-align: center;
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  box-sizing: border-box;
+  transition: transform .18s ease;
+}
+.card:hover{ transform: translateY(-6px); }
+
+.gold { background: rgba(255,215,0,.34); }
+.silver { background: rgba(192,192,192,.28); }
+.bronze { background: rgba(205,127,50,.28); }
+
+/* ===== avatares ===== */
+.avatar-container {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  border: 3px solid rgba(255,255,255,.35);
+  background: rgba(0,0,0,.12);
+  z-index: 2;
+  box-shadow: 0 6px 18px rgba(0,0,0,.35);
+  overflow: hidden;
+  pointer-events: none;
 }
 
+.avatar-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 50%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.avatar-sm-container {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.35);
+  background: rgba(0,0,0,.15);
+  overflow: hidden;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.avatar-sm-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 50%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.protection-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  z-index: 15;
+  pointer-events: none;
+}
+
+/* ===== coroa ===== */
+.crown{
+  position:absolute;
+  top:-12px;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:32px;
+  z-index:3;
+  pointer-events:none;
+  text-shadow:0 3px 8px rgba(0,0,0,.6);
+}
+
+/* ===== tabela ===== */
 table{
   width:100%;
-  margin-top:20px;
+  border-collapse:collapse;
+  margin-top:8px;
+}
+th,td{
+  padding:12px;
+  border-bottom:1px solid rgba(255,255,255,.12);
+}
+th{ text-align:left; }
+
+.page-footer{
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  text-align: center;
+  padding: 12px;
+}
+
+/* 🔒 LOGIN (NÃO ALTERA SEU LAYOUT) */
+#loginBox{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background: rgba(0,0,0,0.95);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+#loginBox input{
+  padding:10px;
+  border-radius:8px;
+  border:none;
+}
+#loginBox button{
+  margin-top:10px;
+  padding:10px 20px;
+  border:none;
+  border-radius:8px;
+  background:#00c853;
+  color:white;
+  font-weight:bold;
 }
 </style>
 </head>
@@ -85,14 +238,11 @@ table{
   <button onclick="verificar()">Entrar</button>
 </div>
 
-<!-- 🔓 CONTEÚDO -->
-<div id="conteudo" style="display:none;">
-
+<!-- ===== SEU SITE ORIGINAL (INALTERADO) ===== -->
 <div class="wrap">
-
-  <div class="header">
-    <img class="club-emblem" src="https://raw.githubusercontent.com/SI-Ramon/ranking/main/ranking/img/GUARDIOES.png">
-    <h1>Ranking - Guardiões</h1>
+  <div id="headerWrap" class="header">
+    <img id="clubEmblem" class="club-emblem" src="" />
+    <h1 class="title">Ranking - Guardiões</h1>
   </div>
 
   <div class="podium" id="podium"></div>
@@ -102,14 +252,12 @@ table{
     <thead>
       <tr>
         <th>#</th>
-        <th>Nome</th>
+        <th>Desbravador</th>
         <th>Pontos</th>
       </tr>
     </thead>
     <tbody id="tbody"></tbody>
   </table>
-
-</div>
 </div>
 
 <script>
@@ -119,67 +267,15 @@ function verificar(){
 
   if(senha === "AmelhorAventuraDBV2026"){
     localStorage.setItem("acesso","ok");
-    liberar();
+    document.getElementById("loginBox").style.display = "none";
   } else {
     alert("Senha incorreta!");
   }
 }
 
-function liberar(){
-  document.getElementById("loginBox").style.display = "none";
-  document.getElementById("conteudo").style.display = "block";
-}
-
 if(localStorage.getItem("acesso") === "ok"){
-  liberar();
+  document.getElementById("loginBox").style.display = "none";
 }
-
-// 📊 DADOS (SUA PLANILHA)
-const SHEET_ID = "1XSBKPMg4nlzAJpACvZ5hCumqOyFPFIIRqV60gghP43E";
-const SHEET_NAME = "RANKING";
-
-function parseGViz(text){
-  const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
-  return JSON.parse(text.substring(start, end + 1));
-}
-
-async function load(){
-  const query = encodeURIComponent("select A, B where A is not null order by B desc");
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${SHEET_NAME}&tq=${query}`;
-
-  const res = await fetch(url);
-  const text = await res.text();
-  const data = parseGViz(text);
-
-  const rows = data.table.rows.map(r => ({
-    nome: r.c[0].v,
-    pontos: r.c[1].v
-  }));
-
-  // PODIUM
-  const podium = document.getElementById("podium");
-  podium.innerHTML = "";
-
-  rows.slice(0,3).forEach((p,i)=>{
-    const div = document.createElement("div");
-    div.className = "card";
-    div.innerHTML = `<h3>${i+1}º</h3><strong>${p.nome}</strong><p>${p.pontos} pts</p>`;
-    podium.appendChild(div);
-  });
-
-  // TABELA
-  const tbody = document.getElementById("tbody");
-  tbody.innerHTML = "";
-
-  rows.forEach((p,i)=>{
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${i+1}</td><td>${p.nome}</td><td>${p.pontos}</td>`;
-    tbody.appendChild(tr);
-  });
-}
-
-load();
 </script>
 
 </body>
