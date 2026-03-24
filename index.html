@@ -6,654 +6,180 @@
 <title>Ranking - Guardiões</title>
 
 <style>
-/* ===== BODY / BACKGROUND ===== */
 body{
   font-family: Arial, sans-serif;
   margin: 0;
   min-height: 100vh;
   color: #fff;
-
-  background-image:
-    linear-gradient(rgba(12,25,30,0.60), rgba(12,25,30,0.60)),
-    url('https://raw.githubusercontent.com/SI-Ramon/ranking/main/ranking/img/desbravador.webp');
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-}
-@media (max-width: 480px){
-  body{
-    background-attachment: scroll;
-    background-position: center top;
-  }
+  background: linear-gradient(rgba(12,25,30,0.85), rgba(12,25,30,0.85));
 }
 
-/* ===== layout ===== */
+/* LOGIN */
+#loginBox{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  height:100vh;
+}
+#loginBox input{
+  padding:10px;
+  margin:10px;
+  border-radius:8px;
+  border:none;
+}
+#loginBox button{
+  padding:10px 20px;
+  border:none;
+  border-radius:8px;
+  background:#00c853;
+  color:#fff;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+/* CONTEÚDO ORIGINAL */
 .wrap{
   max-width:1000px;
   margin:auto;
   padding:30px;
-  padding-bottom:110px;
 }
 
-/* header com emblema + título */
 .header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 8px;
-}
-h1.title {
-  font-size: 28px;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-weight: 700;
-  color: #fff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:10px;
 }
 
-/* emblema do clube */
-.club-emblem {
-  width: 60px;
-  height: 60px;
-  object-fit: contain;
-  border-radius: 8px;
-  border: 2px solid rgba(255,255,255,0.18);
-  background: rgba(0,0,0,0.08);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
-  display: inline-block;
-  position: relative;
-  pointer-events: none; /* Impede clique */
-  -webkit-user-drag: none; /* Impede arrastar */
-  user-drag: none;
+.club-emblem{
+  width:60px;
 }
 
-/* quando não houver emblema, escondemos o <img> e centralizamos apenas o texto */
-.header.no-emblem {
-  justify-content: center;
-}
-.header.no-emblem .club-emblem {
-  display: none;
-}
-
-/* ===== podium grid ===== */
 .podium{
   display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:15px;
-  margin: 18px 0 40px;
-  justify-items:center;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
 }
 
-/* ===== card ===== */
 .card{
-  position: relative;
-  overflow: visible;
-  background: rgba(255,255,255,.08);
-  padding: 100px 20px 20px;
-  border-radius: 15px;
-  text-align: center;
-  min-height: 260px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  box-sizing: border-box;
-  transition: transform .18s ease;
-}
-.card:hover{ transform: translateY(-6px); }
-
-.gold { background: rgba(255,215,0,.34); }
-.silver { background: rgba(192,192,192,.28); }
-.bronze { background: rgba(205,127,50,.28); }
-
-/* ===== avatares - agora como canvas ===== */
-.avatar-container {
-  position: absolute;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 92px;
-  height: 92px;
-  border-radius: 50%;
-  border: 3px solid rgba(255,255,255,.35);
-  background: rgba(0,0,0,.12);
-  z-index: 2;
-  box-shadow: 0 6px 18px rgba(0,0,0,.35);
-  overflow: hidden;
-  pointer-events: none; /* Impede interação */
+  background:rgba(255,255,255,.1);
+  padding:20px;
+  border-radius:10px;
+  text-align:center;
 }
 
-.avatar-canvas {
-  width: 100%;
-  height: 100%;
-  display: block;
-  border-radius: 50%;
-  object-fit: cover;
-  pointer-events: none;
-}
-
-.avatar-sm-container {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: 1px solid rgba(255,255,255,.35);
-  background: rgba(0,0,0,.15);
-  overflow: hidden;
-  flex-shrink: 0;
-  pointer-events: none;
-}
-
-.avatar-sm-canvas {
-  width: 100%;
-  height: 100%;
-  display: block;
-  border-radius: 50%;
-  object-fit: cover;
-  pointer-events: none;
-}
-
-/* Overlay invisível adicional */
-.protection-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: transparent;
-  z-index: 15;
-  cursor: default;
-  pointer-events: none;
-}
-
-/* ===== coroa ===== */
-.crown{
-  position:absolute;
-  top:-12px;
-  left:50%;
-  transform:translateX(-50%);
-  font-size:32px;
-  z-index:3;
-  pointer-events:none;
-  text-shadow:0 3px 8px rgba(0,0,0,.6);
-}
-
-/* ===== texto dentro do card ===== */
-.card h3{
-  margin-top: 2px;
-  margin-bottom: 6px;
-  font-size:18px;
-  color:#fff;
-  pointer-events: none;
-}
-.card strong{
-  display:block;
-  font-size:18px;
-  margin-bottom:8px;
-  color:#fff;
-  pointer-events: none;
-}
-.card p{
-  margin:0;
-  font-size:16px;
-  color: #fff;
-  opacity: .95;
-  pointer-events: none;
-}
-
-/* ===== tabela ===== */
 table{
   width:100%;
-  border-collapse:collapse;
-  margin-top:8px;
-}
-th,td{
-  padding:12px;
-  border-bottom:1px solid rgba(255,255,255,.12);
-}
-th{
-  text-align:left;
-  font-weight:600;
-}
-.right{
-  text-align:right;
-}
-.rowflex{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  pointer-events: none;
-}
-.muted{
-  opacity:.75;
-  font-size:.9rem;
-  margin-top:10px;
-}
-
-/* ===== footer (rodapé fixo) ===== */
-.page-footer{
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(180deg, rgba(12,25,30,0.0), rgba(0,0,0,0.45));
-  border-top: 1px solid rgba(255,255,255,0.06);
-  padding: 12px 0;
-  text-align: center;
-  color: #fff;
-  z-index: 1000;
-  backdrop-filter: blur(4px);
-}
-.page-footer .updated {
-  font-size: 0.95rem;
-  opacity: .95;
-}
-
-/* ===== responsivo ===== */
-@media (max-width: 900px){
-  .podium{ grid-template-columns: repeat(3, 1fr); gap:14px; }
-  .card{ min-height: 260px; padding-top: 96px; }
-  .avatar-container{ width: 88px; height:88px; top: 20px; }
-  .club-emblem{ width: 52px; height: 52px; }
-}
-
-@media (max-width: 480px){
-  .podium{ grid-template-columns: repeat(3, 1fr); gap:10px; margin-bottom:30px; }
-  .card{ min-height: 240px; padding-top: 88px; border-radius: 18px; }
-  .avatar-container{ width: 76px; height:76px; top: 24px; }
-  .club-emblem{ width: 46px; height: 46px; }
-  .card h3{ font-size:16px; margin-top: 0; margin-bottom: 4px; }
-  .card strong{ font-size:16px; }
-  .card p{ font-size:14px; }
-  th, td{ padding: 8px; }
-}
-
-@media (max-width: 320px){
-  .podium{ grid-template-columns: repeat(1, 1fr); }
-  .card{ min-height: 220px; padding-top: 80px; }
-  .avatar-container{ width:70px; height:70px; top: 24px; }
-  .club-emblem{ width: 40px; height: 40px; }
-}
-
-/* Impede seleção de texto */
-* {
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+  margin-top:20px;
 }
 </style>
 </head>
 
 <body>
+
+<!-- 🔒 LOGIN -->
+<div id="loginBox">
+  <h2>🔒 Acesso Restrito</h2>
+  <input type="password" id="senha" placeholder="Digite a senha">
+  <button onclick="verificar()">Entrar</button>
+</div>
+
+<!-- 🔓 CONTEÚDO -->
+<div id="conteudo" style="display:none;">
+
 <div class="wrap">
-  <!-- header: emblema + título -->
-  <div id="headerWrap" class="header">
-    <img id="clubEmblem" class="club-emblem" src="" alt="Emblema do clube" />
-    <h1 class="title">Ranking - Guardiões</h1>
+
+  <div class="header">
+    <img class="club-emblem" src="https://raw.githubusercontent.com/SI-Ramon/ranking/main/ranking/img/GUARDIOES.png">
+    <h1>Ranking - Guardiões</h1>
   </div>
 
   <div class="podium" id="podium"></div>
 
-  <h2 style="margin-top:6px;">📋 Ranking Completo</h2>
+  <h2>📋 Ranking Completo</h2>
   <table>
     <thead>
       <tr>
-        <th style="width:48px">#</th>
-        <th>Desbravador</th>
-        <th class="right" style="width:120px">Pontos</th>
+        <th>#</th>
+        <th>Nome</th>
+        <th>Pontos</th>
       </tr>
     </thead>
     <tbody id="tbody"></tbody>
   </table>
 
-  <div class="muted" id="status"></div>
+</div>
 </div>
 
-<footer class="page-footer">
-  <div id="updated" class="updated">Atualizando...</div>
-</footer>
-
 <script>
-/* ============================
-  SISTEMA DE PROTEÇÃO DE IMAGENS
-  - URLs ofuscadas (nunca expostas no HTML)
-  - Renderização via Canvas
-  - Bloqueio de eventos
-  - Anti-devtools básico
-============================ */
+// 🔐 LOGIN
+function verificar(){
+  const senha = document.getElementById("senha").value;
 
-// ===== CONFIGURAÇÕES =====
-const EMBLEM_URL = "https://raw.githubusercontent.com/SI-Ramon/ranking/main/ranking/img/GUARDIOES.png";
+  if(senha === "AmelhorAventuraDBV2026"){
+    localStorage.setItem("acesso","ok");
+    liberar();
+  } else {
+    alert("Senha incorreta!");
+  }
+}
+
+function liberar(){
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("conteudo").style.display = "block";
+}
+
+if(localStorage.getItem("acesso") === "ok"){
+  liberar();
+}
+
+// 📊 DADOS (SUA PLANILHA)
 const SHEET_ID = "1XSBKPMg4nlzAJpACvZ5hCumqOyFPFIIRqV60gghP43E";
 const SHEET_NAME = "RANKING";
 
-// Mapa para ofuscar URLs (simula um "banco de imagens")
-const imageCache = new Map();
-let imageCounter = 0;
-
-// ===== PROTEÇÃO ANTI-DEVTOOLS =====
-(function antiDevTools() {
-    // Bloqueia teclas de atalho
-    document.addEventListener('keydown', function(e) {
-        // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U, Ctrl+S
-        if (e.key === 'F12' || 
-            (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
-            (e.ctrlKey && (e.key === 'U' || e.key === 's'))) {
-            e.preventDefault();
-            return false;
-        }
-    });
-
-    // Bloqueia clique direito em todo o documento
-    document.addEventListener('contextmenu', function(e) {
-        e.preventDefault();
-        return false;
-    });
-
-    // Bloqueia arrastar imagens
-    document.addEventListener('dragstart', function(e) {
-        e.preventDefault();
-        return false;
-    });
-
-    // Detecta DevTools (básico)
-    let devToolsOpen = false;
-    const element = new Image();
-    Object.defineProperty(element, 'id', {
-        get: function() {
-            devToolsOpen = true;
-            throw new Error('DevTools detectado');
-        }
-    });
-    
-    setInterval(function() {
-        devToolsOpen = false;
-        console.log(element);
-        if (devToolsOpen || window.outerWidth - window.innerWidth > 160) {
-            document.body.innerHTML = '<div style="color:white; text-align:center; margin-top:50px;"><h1>Acesso não autorizado</h1><p>Ferramentas de desenvolvedor detectadas.</p></div>';
-        }
-    }, 1000);
-})();
-
-// ===== PROXY DE IMAGENS =====
-function getImageProxyUrl(originalUrl) {
-    if (!originalUrl) return '';
-    
-    // Gera um ID único para a imagem
-    const imageId = 'img_' + (imageCounter++);
-    
-    // Armazena no cache (simula um servidor)
-    imageCache.set(imageId, originalUrl);
-    
-    // Retorna apenas o ID (nunca a URL real)
-    return 'data:image/svg+xml,' + encodeURIComponent(`
-        <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
-            <rect width="100" height="100" fill="#333"/>
-            <text x="50" y="55" font-size="12" text-anchor="middle" fill="#666">${imageId}</text>
-        </svg>
-    `);
-}
-
-// ===== CARREGADOR DE IMAGEM SEGURO =====
-function loadImageSecure(originalUrl, callback) {
-    if (!originalUrl) {
-        callback(null);
-        return;
-    }
-    
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.referrerPolicy = 'no-referrer';
-    
-    img.onload = function() {
-        callback(img);
-    };
-    
-    img.onerror = function() {
-        // Tenta URL alternativa do Drive se necessário
-        if (originalUrl.includes('drive.google.com')) {
-            const altUrl = driveAlt(originalUrl);
-            const altImg = new Image();
-            altImg.crossOrigin = 'anonymous';
-            altImg.onload = () => callback(altImg);
-            altImg.onerror = () => callback(null);
-            altImg.src = bust(altUrl);
-        } else {
-            callback(null);
-        }
-    };
-    
-    img.src = bust(originalUrl);
-}
-
-// ===== RENDERIZADOR CANVAS =====
-function createProtectedImage(originalUrl, className, alt, isSmall = false) {
-    const container = document.createElement('div');
-    container.className = isSmall ? 'avatar-sm-container' : 'avatar-container';
-    
-    const canvas = document.createElement('canvas');
-    canvas.className = isSmall ? 'avatar-sm-canvas' : 'avatar-canvas';
-    canvas.width = isSmall ? 34 : 92;
-    canvas.height = isSmall ? 34 : 92;
-    
-    const ctx = canvas.getContext('2d');
-    
-    // Overlay de proteção
-    const overlay = document.createElement('div');
-    overlay.className = 'protection-overlay';
-    
-    container.appendChild(canvas);
-    container.appendChild(overlay);
-    
-    // Carrega e desenha a imagem
-    loadImageSecure(originalUrl, function(img) {
-        if (img) {
-            // Desenha imagem no canvas
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            
-            // Adiciona marca d'água sutil
-            ctx.font = '10px Arial';
-            ctx.fillStyle = 'rgba(255,255,255,0.2)';
-            ctx.textAlign = 'right';
-            ctx.fillText('🔒', canvas.width - 5, canvas.height - 5);
-        } else {
-            // Desenha placeholder
-            ctx.fillStyle = '#444';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.font = '12px Arial';
-            ctx.fillStyle = '#666';
-            ctx.textAlign = 'center';
-            ctx.fillText('📷', canvas.width/2, canvas.height/2);
-        }
-    });
-    
-    return container;
-}
-
-// ===== FUNÇÕES ORIGINAIS (MODIFICADAS) =====
-function normalizeDriveImage(raw){
-  if (!raw) return "";
-  let u = String(raw).trim();
-  const mImg = u.match(/IMAGE\(\"(.*)\"\)/i);
-  if (mImg && mImg[1]) u = mImg[1].trim();
-  const m1 = u.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
-  if (m1 && m1[1]) return `https://drive.google.com/uc?export=view&id=${m1[1]}`;
-  const m2 = u.match(/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/);
-  if (m2 && m2[1]) return `https://drive.google.com/uc?export=view&id=${m2[1]}`;
-  const m3 = u.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-  if (m3 && m3[1] && u.includes("drive.google.com")) {
-    return `https://drive.google.com/uc?export=view&id=${m3[1]}`;
-  }
-  return u;
-}
-
-function driveAlt(u){
-  const m = u.match(/uc\?export=view&id=([a-zA-Z0-9_-]+)/);
-  if (m && m[1]) return `https://drive.google.com/uc?export=download&id=${m[1]}`;
-  return u;
-}
-
-function bust(u){
-  if (!u) return u;
-  const sep = u.includes("?") ? "&" : "?";
-  return `${u}${sep}t=${Date.now()}`;
-}
-
-// ===== FUNÇÃO GViz =====
 function parseGViz(text){
   const start = text.indexOf("{");
   const end = text.lastIndexOf("}");
-  if (start === -1 || end === -1) throw new Error("Resposta gviz inválida.");
   return JSON.parse(text.substring(start, end + 1));
 }
 
-// ===== EMBLEMA =====
-function loadEmblem() {
-  const imgEl = document.getElementById('clubEmblem');
-  const header = document.getElementById('headerWrap');
-  
-  if (!EMBLEM_URL || EMBLEM_URL.trim() === "") {
-    imgEl.style.display = 'none';
-    header.classList.add('no-emblem');
-    return;
-  }
-  
-  // Emblema também protegido (mas mantém como img com proteções)
-  imgEl.src = bust(EMBLEM_URL);
-  imgEl.setAttribute('oncontextmenu', 'return false;');
-  imgEl.setAttribute('ondragstart', 'return false;');
-  imgEl.style.pointerEvents = 'none';
-  imgEl.style.userSelect = 'none';
-  imgEl.style.webkitUserDrag = 'none';
-  
-  imgEl.onerror = () => { 
-    imgEl.style.display = 'none'; 
-    header.classList.add('no-emblem'); 
-  };
-  
-  imgEl.onload = () => { 
-    imgEl.style.display = 'inline-block'; 
-    header.classList.remove('no-emblem'); 
-  };
-}
-
-// ===== ATUALIZA RODAPÉ =====
-function updateTime(){
-  const el = document.getElementById("updated");
-  if (!el) return;
-  el.innerText = "Atualizado em: " + new Date().toLocaleString("pt-BR");
-}
-
-// ===== CARREGA DADOS =====
 async function load(){
-  const status = document.getElementById("status");
-  status.textContent = "";
-  
-  const query = encodeURIComponent("select A, B, C where A is not null order by B desc");
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tq=${query}`;
-  
-  try {
-    const res = await fetch(url, { cache: "no-store" });
-    const text = await res.text();
-    const data = parseGViz(text);
+  const query = encodeURIComponent("select A, B where A is not null order by B desc");
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${SHEET_NAME}&tq=${query}`;
 
-    const rows = (data.table.rows || []).map(r => {
-      const name = r.c?.[0]?.v || "";
-      const pts = r.c?.[1]?.v || 0;
-      const photoRaw = r.c?.[2]?.v || "";
-      const photoFinal = normalizeDriveImage(photoRaw);
-      return { name, pts, photoRaw, photoFinal };
-    }).filter(x => x.name);
+  const res = await fetch(url);
+  const text = await res.text();
+  const data = parseGViz(text);
 
-    // PODIUM
-    const podium = document.getElementById("podium");
-    podium.innerHTML = "";
-    const styles = ["gold","silver","bronze","",""];
+  const rows = data.table.rows.map(r => ({
+    nome: r.c[0].v,
+    pontos: r.c[1].v
+  }));
 
-    rows.slice(0,5).forEach((p,i)=>{
-      const div = document.createElement("div");
-      div.className = "card " + styles[i];
+  // PODIUM
+  const podium = document.getElementById("podium");
+  podium.innerHTML = "";
 
-      if(i === 0){
-        const crown = document.createElement("div");
-        crown.className = "crown";
-        crown.innerHTML = "👑";
-        div.appendChild(crown);
-      }
+  rows.slice(0,3).forEach((p,i)=>{
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `<h3>${i+1}º</h3><strong>${p.nome}</strong><p>${p.pontos} pts</p>`;
+    podium.appendChild(div);
+  });
 
-      // Imagem protegida
-      const avatarContainer = createProtectedImage(p.photoFinal, "avatar", `Foto de ${p.name}`, false);
-      div.appendChild(avatarContainer);
+  // TABELA
+  const tbody = document.getElementById("tbody");
+  tbody.innerHTML = "";
 
-      const h3 = document.createElement("h3");
-      h3.textContent = `${i+1}º Lugar`;
-      div.appendChild(h3);
-
-      const strong = document.createElement("strong");
-      strong.textContent = p.name;
-      div.appendChild(strong);
-
-      const pEl = document.createElement("p");
-      pEl.textContent = `${p.pts} pontos`;
-      div.appendChild(pEl);
-
-      podium.appendChild(div);
-    });
-
-    // TABELA
-    const tbody = document.getElementById("tbody");
-    tbody.innerHTML = "";
-
-    rows.forEach((p,i)=>{
-      const tr = document.createElement("tr");
-
-      const tdPos = document.createElement("td");
-      tdPos.textContent = i+1;
-
-      const tdName = document.createElement("td");
-      const wrap = document.createElement("div");
-      wrap.className = "rowflex";
-      
-      // Imagem protegida pequena
-      const avatarContainer = createProtectedImage(p.photoFinal, "avatar-sm", `Foto de ${p.name}`, true);
-      wrap.appendChild(avatarContainer);
-
-      const span = document.createElement("span");
-      span.textContent = p.name;
-      wrap.appendChild(span);
-
-      tdName.appendChild(wrap);
-
-      const tdPts = document.createElement("td");
-      tdPts.className = "right";
-      tdPts.textContent = p.pts;
-
-      tr.appendChild(tdPos);
-      tr.appendChild(tdName);
-      tr.appendChild(tdPts);
-
-      tbody.appendChild(tr);
-    });
-
-    updateTime();
-  } catch (err) {
-    status.textContent = "Erro ao carregar dados: " + (err?.message || err);
-    console.error(err);
-  }
+  rows.forEach((p,i)=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${i+1}</td><td>${p.nome}</td><td>${p.pontos}</td>`;
+    tbody.appendChild(tr);
+  });
 }
 
-// ===== INICIALIZAÇÃO =====
-loadEmblem();
-load().catch(err => {
-  document.getElementById("status").textContent = "Erro ao carregar: " + (err?.message || err);
-  console.error(err);
-});
-
-// Atualização automática (agora mais espaçada para não sobrecarregar)
-setInterval(() => load().catch(console.error), 120000); // 2 minutos
+load();
 </script>
 
 </body>
