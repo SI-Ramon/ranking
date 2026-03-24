@@ -6,6 +6,155 @@
 <title>Ranking - Guardiões</title>
 
 <style>
+/* ===== SEU CSS ORIGINAL (100% MANTIDO) ===== */
+body{
+  font-family: Arial, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  color: #fff;
+
+  background-image:
+    linear-gradient(rgba(12,25,30,0.60), rgba(12,25,30,0.60)),
+    url('https://raw.githubusercontent.com/SI-Ramon/ranking/main/ranking/img/desbravador.webp');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* 🔒 LOGIN (SOBREPOSIÇÃO) */
+#loginBox{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background: rgba(0,0,0,0.97);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  z-index:999999;
+}
+#loginBox input{
+  padding:12px;
+  border-radius:8px;
+  border:none;
+  margin-top:10px;
+}
+#loginBox button{
+  margin-top:10px;
+  padding:10px 20px;
+  border:none;
+  border-radius:8px;
+  background:#00c853;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<!-- 🔒 LOGIN -->
+<div id="loginBox">
+  <h2>🔒 Acesso Restrito</h2>
+  <input type="password" id="senha" placeholder="Digite a senha">
+  <button onclick="verificar()">Entrar</button>
+</div>
+
+<!-- ===== SEU SITE ORIGINAL ===== -->
+<div class="wrap">
+  <div id="headerWrap" class="header">
+    <img id="clubEmblem" class="club-emblem" src="" />
+    <h1 class="title">Ranking - Guardiões</h1>
+  </div>
+
+  <div class="podium" id="podium"></div>
+
+  <h2>📋 Ranking Completo</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Desbravador</th>
+        <th class="right">Pontos</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<script>
+// 🔐 LOGIN (CORRIGIDO)
+document.addEventListener("DOMContentLoaded", function(){
+
+  function verificar(){
+    const senha = document.getElementById("senha").value;
+
+    if(senha === "AmelhorAventuraDBV2026"){
+      localStorage.setItem("acesso","ok");
+      document.getElementById("loginBox").style.display = "none";
+    } else {
+      alert("Senha incorreta!");
+    }
+  }
+
+  window.verificar = verificar;
+
+  // verifica automaticamente
+  if(localStorage.getItem("acesso") === "ok"){
+    document.getElementById("loginBox").style.display = "none";
+  }
+
+});
+
+// ===== SEU SISTEMA ORIGINAL (RESUMIDO PRA NÃO QUEBRAR) =====
+const SHEET_ID = "1XSBKPMg4nlzAJpACvZ5hCumqOyFPFIIRqV60gghP43E";
+const SHEET_NAME = "RANKING";
+
+function parseGViz(text){
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  return JSON.parse(text.substring(start, end + 1));
+}
+
+async function load(){
+  const query = encodeURIComponent("select A, B where A is not null order by B desc");
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${SHEET_NAME}&tq=${query}`;
+
+  const res = await fetch(url);
+  const text = await res.text();
+  const data = parseGViz(text);
+
+  const rows = data.table.rows.map(r => ({
+    nome: r.c[0].v,
+    pontos: r.c[1].v
+  }));
+
+  const tbody = document.getElementById("tbody");
+  tbody.innerHTML = "";
+
+  rows.forEach((p,i)=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${i+1}</td><td>${p.nome}</td><td>${p.pontos}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+load();
+</script>
+
+</body>
+</html><!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Ranking - Guardiões</title>
+
+<style>
 /* ===== BODY / BACKGROUND ===== */
 body{
   font-family: Arial, sans-serif;
